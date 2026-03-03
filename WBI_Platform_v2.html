@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WBI Platform — Live Data Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════ DESIGN TOKENS ═══════════════════════ */
+:root {
+  --ink:       #0a0f1e;
+  --ink2:      #1e2640;
+  --text:      #f0f2fa;
+  --muted:     #8892b0;
+  --dim:       #4a5580;
+  --blue:      #3d7eff;
+  --blue2:     #1a56db;
+  --blue-gl:   rgba(61,126,255,.12);
+  --teal:      #0fc6c2;
+  --teal-gl:   rgba(15,198,194,.1);
+  --amber:     #f5a623;
+  --amber-gl:  rgba(245,166,35,.1);
+  --rose:      #f5385d;
+  --rose-gl:   rgba(245,56,93,.1);
+  --green:     #22d3a0;
+  --green-gl:  rgba(34,211,160,.1);
+  --purple:    #a855f7;
+  --purple-gl: rgba(168,85,247,.1);
+  --card:      rgba(255,255,255,.042);
+  --card-b:    rgba(255,255,255,.08);
+  --divider:   rgba(255,255,255,.07);
+  --radius:    14px;
+  --sidebar:   230px;
+  --topbar:    60px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(--ink);color:var(--text);font-size:13px;overflow:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px}
+
+/* ═══ SCREENS ═══ */
+.screen{display:none;height:100vh}
+.screen.show{display:block}
+.app{display:none;height:100vh;overflow:hidden}
+.app.show{display:flex}
+
+/* ═══════ LOGIN ═══════ */
+.login-wrap{
+  height:100vh;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(61,126,255,.22),transparent 70%),
+             radial-gradient(ellipse 60% 60% at 85% 90%,rgba(15,198,194,.12),transparent 60%),
+             var(--ink);
+}
+.login-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%);
+}
+.login-card{
+  position:relative;z-index:2;width:min(420px,92vw);
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:22px;padding:clamp(28px,5vw,48px) clamp(20px,5vw,44px);
+  backdrop-filter:blur(24px);
+  box-shadow:0 40px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06) inset;
+  animation:cardIn .5s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.login-brand{display:flex;align-items:center;gap:11px;margin-bottom:32px}
+.login-icon{width:42px;height:42px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,var(--blue),var(--teal));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 20px rgba(61,126,255,.4)}
+.login-name{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.login-name em{color:var(--blue);font-style:normal}
+.login-badge{margin-left:auto;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;background:var(--blue-gl);color:var(--blue);border:1px solid rgba(61,126,255,.3)}
+.login-h{font-size:clamp(20px,3vw,26px);font-weight:800;letter-spacing:-.5px;margin-bottom:5px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.f-lbl{display:block;font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+.f-inp{display:block;width:100%;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);font-family:'Plus Jakarta Sans';font-size:14px;outline:none;transition:border-color .2s;margin-bottom:16px}
+.f-inp:focus{border-color:rgba(61,126,255,.6);box-shadow:0 0 0 3px rgba(61,126,255,.1)}
+.f-inp::placeholder{color:var(--dim)}
+.f-sel{width:100%;padding:11px 14px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);font-family:'Plus Jakarta Sans';font-size:13px;outline:none;margin-bottom:16px;cursor:pointer}
+.f-sel option{background:#1a2240;color:var(--text)}
+.btn-primary{width:100%;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--blue),#1e48d4);color:#fff;font-family:'Plus Jakarta Sans';font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 24px rgba(61,126,255,.4);transition:transform .15s,box-shadow .15s;letter-spacing:.2px}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(61,126,255,.5)}
+.login-hint{text-align:center;font-size:11px;color:var(--dim);margin-top:18px}
+
+/* ═══════ SIDEBAR ═══════ */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:rgba(255,255,255,.028);border-right:1px solid var(--divider);
+  display:flex;flex-direction:column;height:100vh;overflow-y:auto;overflow-x:hidden;
+  transition:width .25s ease,transform .25s ease;
+}
+.sidebar.collapsed{width:64px}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;border-bottom:1px solid var(--divider);flex-shrink:0;min-height:60px}
+.sb-logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--teal));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;box-shadow:0 2px 12px rgba(61,126,255,.4)}
+.sb-logo-text{font-size:15px;font-weight:800;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;transition:opacity .2s}
+.sb-logo-text em{color:var(--blue);font-style:normal}
+.sidebar.collapsed .sb-logo-text{opacity:0;width:0;overflow:hidden}
+.sb-sec{padding:18px 14px 5px;font-size:9.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--dim);white-space:nowrap;overflow:hidden;transition:opacity .2s}
+.sidebar.collapsed .sb-sec{opacity:0}
+.nav-link{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:9px;margin:1px 6px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;position:relative;user-select:none;white-space:nowrap;overflow:hidden}
+.nav-link:hover{background:var(--card);color:var(--text)}
+.nav-link.active{background:var(--blue-gl);color:var(--blue);border:1px solid rgba(61,126,255,.18)}
+.nav-link.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:3px;border-radius:0 3px 3px 0;background:var(--blue)}
+.nav-icon{font-size:16px;width:22px;text-align:center;flex-shrink:0}
+.nav-txt{transition:opacity .2s;flex:1}
+.sidebar.collapsed .nav-txt{opacity:0;width:0}
+.nav-badge{margin-left:auto;font-size:9px;font-weight:800;background:var(--rose);color:#fff;padding:2px 6px;border-radius:100px;flex-shrink:0;transition:opacity .2s}
+.sidebar.collapsed .nav-badge{opacity:0;width:0;overflow:hidden}
+.sb-user{margin-top:auto;padding:12px;border-top:1px solid var(--divider);flex-shrink:0}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--card-b);cursor:pointer;transition:background .15s;overflow:hidden}
+.user-card:hover{background:rgba(255,255,255,.065)}
+.user-menu{position:relative}
+.user-dropdown{display:none;position:absolute;bottom:calc(100% + 8px);left:0;right:0;background:#1a2240;border:1px solid var(--divider);border-radius:12px;overflow:hidden;box-shadow:0 -12px 40px rgba(0,0,0,.5);z-index:50}
+.user-dropdown.open{display:block;animation:dropUp .18s cubic-bezier(.22,1,.36,1)}
+@keyframes dropUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.udrop-head{padding:12px 14px;border-bottom:1px solid var(--divider);background:rgba(255,255,255,.02)}
+.udrop-name{font-size:12px;font-weight:800}
+.udrop-role{font-size:10px;color:var(--muted);margin-top:1px}
+.udrop-item{display:flex;align-items:center;gap:9px;padding:10px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .12s}
+.udrop-item:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.udrop-item.danger{color:var(--rose)}
+.udrop-item.danger:hover{background:rgba(245,56,93,.08)}
+.udrop-sep{height:1px;background:var(--divider);margin:3px 0}
+.user-av{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.user-info{overflow:hidden;transition:opacity .2s;flex:1}
+.sidebar.collapsed .user-info{opacity:0;width:0}
+.user-name{font-size:12px;font-weight:700;white-space:nowrap}
+.user-role{font-size:10px;color:var(--muted)}
+
+/* ═══════ MAIN AREA ═══════ */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:var(--topbar);flex-shrink:0;background:rgba(255,255,255,.024);border-bottom:1px solid var(--divider);display:flex;align-items:center;padding:0 20px;gap:12px;flex-wrap:wrap}
+.tb-title{font-size:clamp(14px,2vw,17px);font-weight:800;letter-spacing:-.4px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-title span{color:var(--muted);font-size:12px;font-weight:400;margin-left:7px}
+.sb-toggle{width:32px;height:32px;border-radius:8px;border:1px solid var(--divider);background:var(--card);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all .15s}
+.sb-toggle:hover{color:var(--text);background:var(--card-b)}
+.period-tabs{display:flex;background:var(--card);border:1px solid var(--card-b);border-radius:9px;padding:3px;gap:2px;flex-shrink:0}
+.period-tab{padding:5px 11px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;color:var(--dim);transition:all .15s}
+.period-tab.active{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(61,126,255,.35)}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-family:'Plus Jakarta Sans';font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .15s;flex-shrink:0}
+.tb-btn.ghost{background:var(--card);border:1px solid var(--card-b);color:var(--muted)}
+.tb-btn.ghost:hover{color:var(--text);background:rgba(255,255,255,.07)}
+.tb-btn.cta{background:var(--blue);color:#fff;box-shadow:0 2px 12px rgba(61,126,255,.35)}
+.tb-btn.cta:hover{background:var(--blue2)}
+.page-wrap{flex:1;overflow-y:auto;padding:clamp(14px,2vw,24px)}
+
+/* ═══════ PAGES ═══════ */
+.page{display:none;animation:pgIn .3s ease both}
+.page.show{display:block}
+@keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════ CARDS ═══════ */
+.card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);overflow:hidden;transition:border-color .2s}
+.card:hover{border-color:rgba(255,255,255,.12)}
+.card-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--divider);flex-wrap:wrap;gap:8px}
+.card-title{font-size:14px;font-weight:700;flex:1}
+.card-body{padding:18px}
+
+/* ═══════ KPI GRID ═══════ */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:13px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden;animation:kpiIn .5s ease both}
+.kpi:nth-child(1){animation-delay:.05s}.kpi:nth-child(2){animation-delay:.1s}.kpi:nth-child(3){animation-delay:.15s}.kpi:nth-child(4){animation-delay:.2s}
+@keyframes kpiIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.blue::before{background:var(--blue)}.kpi.teal::before{background:var(--teal)}.kpi.amber::before{background:var(--amber)}.kpi.rose::before{background:var(--rose)}.kpi.green::before{background:var(--green)}
+.kpi-glow{position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;filter:blur(30px);opacity:.15}
+.kpi.blue .kpi-glow{background:var(--blue)}.kpi.teal .kpi-glow{background:var(--teal)}.kpi.amber .kpi-glow{background:var(--amber)}.kpi.rose .kpi-glow{background:var(--rose)}.kpi.green .kpi-glow{background:var(--green)}
+.kpi-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+.kpi-val{font-size:clamp(26px,4vw,34px);font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:8px}
+.kpi-sub{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.trend{font-size:10px;font-weight:800;padding:2px 7px;border-radius:100px}
+.trend.up{background:rgba(34,211,160,.15);color:var(--green)}
+.trend.dn{background:rgba(245,56,93,.15);color:var(--rose)}
+.trend.fl{background:rgba(136,146,176,.1);color:var(--muted)}
+
+/* ═══════ BADGES ═══════ */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:700}
+.badge.thriving{background:rgba(34,211,160,.12);color:var(--green);border:1px solid rgba(34,211,160,.2)}
+.badge.stable  {background:var(--blue-gl);color:var(--blue);border:1px solid rgba(61,126,255,.2)}
+.badge.atrisk  {background:var(--amber-gl);color:var(--amber);border:1px solid rgba(245,166,35,.2)}
+.badge.critical{background:var(--rose-gl);color:var(--rose);border:1px solid rgba(245,56,93,.2)}
+.rc{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:800}
+.rc-h{background:rgba(245,56,93,.15);color:var(--rose)}
+.rc-m{background:rgba(245,166,35,.15);color:var(--amber)}
+.rc-l{background:rgba(34,211,160,.15);color:var(--green)}
+
+/* ═══════ TABLE ═══════ */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;min-width:480px}
+.tbl th{padding:9px 13px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--dim);text-align:left;background:rgba(255,255,255,.022);border-bottom:1px solid var(--divider);white-space:nowrap}
+.tbl td{padding:11px 13px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--divider);transition:background .12s;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.022)}
+.tbl td.str{font-weight:700;color:var(--text)}
+.tbl td.mono{font-family:'JetBrains Mono';font-size:12px}
+
+/* ═══════ PILLAR BARS ═══════ */
+.pillar-group{display:flex;flex-direction:column;gap:13px}
+.pillar-row{display:flex;flex-direction:column;gap:4px}
+.pillar-top{display:flex;justify-content:space-between;align-items:center}
+.pillar-nm{font-size:12px;font-weight:600;color:var(--muted)}
+.pillar-sc{font-size:13px;font-weight:800;font-family:'JetBrains Mono'}
+.bar-bg{height:7px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden}
+.bar-fill{height:100%;border-radius:100px;transition:width .8s ease}
+
+/* ═══════ GRID LAYOUTS ═══════ */
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.g32{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.g13{display:grid;grid-template-columns:1fr 3fr;gap:14px}
+@media(max-width:900px){.g32,.g13{grid-template-columns:1fr}}
+.mb{margin-bottom:14px}
+
+/* ═══════ ALERTS ═══════ */
+.alert{display:flex;align-items:flex-start;gap:12px;padding:13px 17px;border-radius:11px;margin-bottom:18px}
+.alert.warn{background:var(--amber-gl);border:1px solid rgba(245,166,35,.2)}
+.alert.danger{background:var(--rose-gl);border:1px solid rgba(245,56,93,.22)}
+.alert.info{background:var(--blue-gl);border:1px solid rgba(61,126,255,.2)}
+.alert.success{background:var(--green-gl);border:1px solid rgba(34,211,160,.2)}
+.alert-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.alert p{font-size:12.5px;line-height:1.6;color:var(--muted)}
+.alert p strong{color:var(--text)}
+.al{color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline}
+
+/* ═══════ TAGS ═══════ */
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:7px;font-size:10.5px;font-weight:600;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--divider)}
+
+/* ═══════ AVATAR ═══════ */
+.av{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+
+/* ═══════ PAGE TABS ═══════ */
+.ptabs{display:flex;border-bottom:1px solid var(--divider);margin-bottom:20px;gap:0;overflow-x:auto}
+.ptab{padding:10px 16px;font-size:13px;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px;white-space:nowrap}
+.ptab:hover{color:var(--text)}
+.ptab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* ═══════ TOGGLE ═══════ */
+.toggle{display:flex;background:var(--card);border:1px solid var(--card-b);border-radius:9px;padding:3px;gap:2px;flex-shrink:0}
+.toggle-btn{padding:4px 11px;border-radius:7px;border:none;cursor:pointer;font-family:'Plus Jakarta Sans';font-size:11px;font-weight:600;color:var(--dim);background:transparent;transition:all .15s}
+.toggle-btn.active{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(61,126,255,.3)}
+
+/* ═══════ UPLOAD ZONE ═══════ */
+.drop-zone{border:2px dashed rgba(255,255,255,.13);border-radius:13px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.02)}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--blue);background:var(--blue-gl)}
+.drop-ico{font-size:34px;margin-bottom:10px}
+.drop-txt{font-size:14px;font-weight:700;margin-bottom:4px}
+.drop-sub{font-size:12px;color:var(--muted)}
+
+/* ═══════ STEP BAR ═══════ */
+.steps{display:flex;align-items:flex-start;gap:0}
+.step{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0}
+.step-c{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+.step-c.done{background:var(--green);color:var(--ink)}
+.step-c.act {background:var(--blue);color:#fff;box-shadow:0 0 12px rgba(61,126,255,.4)}
+.step-c.pend{background:rgba(255,255,255,.07);color:var(--dim);border:1px solid var(--divider)}
+.step-l{font-size:10px;font-weight:600;color:var(--dim)}
+.step.act .step-l{color:var(--blue)}
+.step-line{flex:1;height:2px;background:var(--divider);margin-bottom:18px}
+.step-line.done{background:var(--green)}
+
+/* ═══════ PROGRESS ═══════ */
+.prog{height:5px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden;margin-top:5px}
+.prog-fill{height:100%;border-radius:100px}
+
+/* ═══════ SCORE BAR INLINE ═══════ */
+.sb-inline{display:inline-flex;align-items:center;gap:7px}
+.sm{width:55px;height:5px;border-radius:100px;background:rgba(255,255,255,.07);overflow:hidden;display:inline-block}
+.sm-fill{height:100%;border-radius:100px;display:block}
+
+/* ═══════ HEATMAP CELL ═══════ */
+.hm{height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff}
+
+/* ═══════ WEIGHT SLIDERS ═══════ */
+.wt-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--divider)}
+.wt-row:last-child{border-bottom:none}
+.wt-ico{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.wt-lbl{font-size:12px;font-weight:600;color:var(--muted);width:140px;flex-shrink:0}
+input[type=range]{flex:1;accent-color:var(--blue);cursor:pointer;min-width:60px}
+.wt-pct{font-size:13px;font-weight:800;color:var(--blue);width:40px;text-align:right;font-family:'JetBrains Mono'}
+
+/* ═══════ SETTINGS ═══════ */
+.set-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--divider);gap:14px}
+.set-row:last-child{border-bottom:none}
+.set-info{flex:1}
+.set-nm{font-size:13px;font-weight:700}
+.set-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.set-inp{padding:7px 11px;border-radius:8px;border:1px solid var(--divider);background:rgba(255,255,255,.05);color:var(--text);font-family:'Plus Jakarta Sans';font-size:12px;outline:none;width:auto;min-width:110px}
+.set-inp:focus{border-color:rgba(61,126,255,.5)}
+
+/* ═══════ INVITE MODAL ═══════ */
+#invite-modal{display:none}
+#invite-modal.open{display:flex !important}
+
+/* ═══════ ULOG ═══════ */
+.ulog{padding:12px 16px;border-bottom:1px solid var(--divider)}
+.ulog:last-child{border-bottom:none}
+.ulog-head{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.ulog-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.ulog-name{font-size:12px;font-weight:700}
+.ulog-meta{font-size:10.5px;color:var(--muted);padding-left:15px}
+
+/* ═══════ DIST BAR ═══════ */
+.dist-bar{display:flex;height:20px;border-radius:8px;overflow:hidden;gap:2px;margin-bottom:16px}
+.dist-seg{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff}
+
+/* ═══════ CHART BARS ═══════ */
+.chart-bar-wrap{display:flex;align-items:flex-end;gap:6px;height:120px;padding-bottom:18px}
+.cb{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:0}
+.cb-bar{width:100%;border-radius:5px 5px 0 0}
+.cb-lbl{font-size:9px;color:var(--dim);font-family:'JetBrains Mono';white-space:nowrap}
+
+/* ═══════ RESPONSIVE ═══════ */
+@media(max-width:768px){
+  :root{--sidebar:0px;--topbar:54px}
+  .sidebar{position:fixed;left:0;top:0;height:100%;z-index:100;width:230px;transform:translateX(-100%)}
+  .sidebar.mobile-open{transform:translateX(0);box-shadow:8px 0 40px rgba(0,0,0,.6)}
+  .app.show{flex-direction:column}
+  .topbar{padding:0 14px;gap:8px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .g32,.g13{grid-template-columns:1fr}
+  .page-wrap{padding:14px}
+  .tb-title span{display:none}
+  .period-tabs{display:none}
+}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .kpi-val{font-size:26px}
+}
+
+/* ═══════ DATA LOADING OVERLAY ═══════ */
+.data-overlay{position:fixed;inset:0;background:var(--ink);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .4s}
+.data-overlay.fade-out{opacity:0;pointer-events:none}
+.loader{width:40px;height:40px;border:3px solid rgba(61,126,255,.2);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-txt{font-size:13px;color:var(--muted)}
+
+/* ═══════ EMPTY STATE ═══════ */
+.empty{text-align:center;padding:40px 20px;color:var(--dim)}
+.empty-ico{font-size:36px;margin-bottom:10px}
+.empty-txt{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--muted)}
+.empty-sub{font-size:12px}
+
+/* ═══════ MOBILE OVERLAY ═══════ */
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+.mob-overlay.show{display:block}
+
+/* ═══════ DATA SOURCE NOTICE ═══════ */
+.data-notice{
+  position:fixed;bottom:12px;right:12px;z-index:50;
+  background:var(--ink2);border:1px solid var(--divider);border-radius:12px;
+  padding:10px 14px;font-size:11px;color:var(--muted);max-width:280px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+.data-notice strong{color:var(--text)}
+
+/* ═══════ FILE INPUT HIDDEN ═══════ */
+.file-input{display:none}
+
+/* ═══════ METRIC CARDS ═══════ */
+.metric-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.metric-card{background:rgba(255,255,255,.03);border:1px solid var(--divider);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s,background .2s}
+.metric-card:hover{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.13)}
+.metric-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.metric-card-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.metric-card-score{font-size:26px;font-weight:800;font-family:'JetBrains Mono';letter-spacing:-1px;line-height:1}
+.metric-card-label{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px}
+.metric-card-desc{font-size:11px;color:var(--dim);margin-bottom:10px}
+.metric-card-bar{height:5px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden}
+.metric-card-fill{height:100%;border-radius:100px;transition:width .7s ease}
+.metric-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.metric-card-bench{font-size:10px;color:var(--dim)}
+.metric-card-bench span{color:var(--muted);font-weight:600}
+
+/* ═══════ USER TABLE ROLE BADGES ═══════ */
+.role-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:7px;font-size:10.5px;font-weight:700}
+.role-admin{background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.2)}
+.role-hr{background:var(--blue-gl);color:var(--blue);border:1px solid rgba(61,126,255,.2)}
+.role-viewer{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--divider)}
+.status-dot{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600}
+.status-dot::before{content:'';width:6px;height:6px;border-radius:50%;display:inline-block}
+.status-active::before{background:var(--green)}
+.status-inactive::before{background:var(--dim)}
+.status-pending::before{background:var(--amber)}
+
+/* ═══════ TENANT ISOLATION BANNER ═══════ */
+.isolation-banner{display:flex;align-items:center;gap:10px;padding:9px 14px;background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.18);border-radius:9px;margin-bottom:14px;font-size:12px;color:var(--muted)}
+.isolation-banner strong{color:var(--purple)}
+.isolation-banner .iso-ico{font-size:14px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div class="data-overlay" id="data-overlay">
+  <div class="sb-logo-icon" style="width:48px;height:48px;font-size:24px;border-radius:14px;margin-bottom:8px">📊</div>
+  <div class="loader"></div>
+  <div class="loader-txt" id="loader-msg">Initialising WBI Platform…</div>
+</div>
+
+<!-- Mobile nav overlay -->
+<div class="mob-overlay" id="mob-overlay" onclick="closeMobileNav()"></div>
+
+<!-- ════════════════ LOGIN SCREEN ════════════════ -->
+<div class="screen show" id="sc-login">
+  <div class="login-wrap">
+    <div class="login-grid"></div>
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="login-icon">📊</div>
+        <div class="login-name">WBI<em>Saas</em></div>
+        <div class="login-badge">MULTI-TENANT</div>
+      </div>
+      <div class="login-h">Welcome back</div>
+      <div class="login-sub">Sign in to your wellbeing command centre</div>
+      <label class="f-lbl">Select Organisation</label>
+      <select class="f-sel" id="login-tenant">
+        <option value="T1">Acme Corp Ltd (Pro)</option>
+        <option value="T2">TechNova Pvt Ltd (Enterprise)</option>
+      </select>
+      <label class="f-lbl">Work Email</label>
+      <input class="f-inp" type="email" placeholder="hr@company.com" value="admin@acmecorp.com" id="login-email">
+      <label class="f-lbl">Password</label>
+      <input class="f-inp" type="password" placeholder="••••••••" value="••••••••">
+      <button class="btn-primary" onclick="doLogin()">Sign in to Dashboard →</button>
+      <p class="login-hint">Multi-tenant · Data isolated · SOC 2 Ready</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ APP SHELL ════════════════ -->
+<div class="app" id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">📊</div>
+      <div class="sb-logo-text">WBI<em>Saas</em></div>
+    </div>
+    <div class="sb-sec">Overview</div>
+    <div class="nav-link" id="nl-company"    onclick="goPage('company')"><span class="nav-icon">🏢</span><span class="nav-txt">Company</span></div>
+    <div class="nav-link" id="nl-department" onclick="goPage('department')"><span class="nav-icon">🏬</span><span class="nav-txt">Departments</span></div>
+    <div class="nav-link" id="nl-manager"    onclick="goPage('manager')"><span class="nav-icon">👥</span><span class="nav-txt">Managers</span></div>
+    <div class="sb-sec">Employees</div>
+    <div class="nav-link" id="nl-employee"   onclick="goPage('employee')"><span class="nav-icon">👤</span><span class="nav-txt">Employee Profile</span></div>
+    <div class="nav-link" id="nl-attrition"  onclick="goPage('attrition')"><span class="nav-icon">⚠️</span><span class="nav-txt">Attrition Risk</span><span class="nav-badge" id="risk-badge">0</span></div>
+    <div class="sb-sec">Data</div>
+    <div class="nav-link" id="nl-upload"     onclick="goPage('upload')"><span class="nav-icon">📤</span><span class="nav-txt">Data Upload</span></div>
+    <div class="sb-sec">Admin</div>
+    <div class="nav-link" id="nl-settings"   onclick="goPage('settings')"><span class="nav-icon">⚙️</span><span class="nav-txt">Settings</span></div>
+    <div class="sb-user">
+      <div class="user-menu">
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="udrop-head">
+            <div class="udrop-name" id="dd-uname">Sneha Agarwal</div>
+            <div class="udrop-role" id="dd-urole">Admin · Acme Corp Ltd</div>
+          </div>
+          <div class="udrop-item" onclick="goPage('settings');closeUserMenu()">⚙️ Settings</div>
+          <div class="udrop-sep"></div>
+          <div class="udrop-item danger" onclick="doLogout()">⏻ Sign out</div>
+        </div>
+        <div class="user-card" onclick="toggleUserMenu()">
+          <div class="user-av" id="sb-avatar">SA</div>
+          <div class="user-info">
+            <div class="user-name" id="sb-uname">Sneha Agarwal</div>
+            <div class="user-role" id="sb-urole">Admin</div>
+          </div>
+          <span style="color:var(--dim);font-size:11px;flex-shrink:0" id="dd-caret">▾</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <button class="sb-toggle" onclick="toggleSidebar()" id="sb-toggle-btn">☰</button>
+      <div class="tb-title" id="tb-title">Company Overview <span id="tb-sub">—</span></div>
+      <div class="period-tabs">
+        <div class="period-tab active">Q1 2025</div>
+        <div class="period-tab">Q4 2024</div>
+        <div class="period-tab">Annual</div>
+      </div>
+      <button class="tb-btn ghost" onclick="exportData()">📥 Export</button>
+      <button class="tb-btn cta"   onclick="goPage('upload')">＋ Upload</button>
+    </div>
+    <div class="page-wrap">
+
+<!-- ══════════════════════════════════
+     PAGE: COMPANY OVERVIEW
+══════════════════════════════════ -->
+<div class="page show" id="pg-company">
+  <div class="isolation-banner">
+    <span class="iso-ico">🔐</span>
+    <div><strong id="iso-tenant-name">Acme Corp Ltd</strong> — You are viewing data scoped exclusively to this tenant. No other tenant's data is accessible in this session. API token: <span style="font-family:'JetBrains Mono';font-size:10px;color:var(--purple)" id="iso-token">T1:sess_xxx</span></div>
+  </div>
+  <div id="company-alert" class="alert warn" style="display:none">
+    <span class="alert-ico">⚠️</span>
+    <p><strong id="ca-txt"></strong> — <span class="al" onclick="goPage('attrition')">View risk report →</span></p>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi blue"><div class="kpi-glow"></div><div class="kpi-lbl">Overall WBI Score</div><div class="kpi-val" style="color:var(--blue)" id="c-wbi">—</div><div class="kpi-sub"><span class="trend up" id="c-wbi-tr">—</span></div></div>
+    <div class="kpi teal"><div class="kpi-glow"></div><div class="kpi-lbl">Active Employees</div><div class="kpi-val" style="color:var(--teal)" id="c-emp">—</div><div class="kpi-sub" id="c-emp-sub">—</div></div>
+    <div class="kpi amber"><div class="kpi-glow"></div><div class="kpi-lbl">Attrition Risk Avg</div><div class="kpi-val" style="color:var(--amber)" id="c-risk">—</div><div class="kpi-sub" id="c-risk-sub">—</div></div>
+    <div class="kpi rose"><div class="kpi-glow"></div><div class="kpi-lbl">At Risk / Critical</div><div class="kpi-val" style="color:var(--rose)" id="c-crit">—</div><div class="kpi-sub" id="c-crit-sub">—</div></div>
+  </div>
+  <div class="g32 mb">
+    <div class="card">
+      <div class="card-head"><div class="card-title">WBI Trend (last 8 quarters)</div></div>
+      <div class="card-body">
+        <div class="chart-bar-wrap" id="trend-chart"></div>
+        <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid var(--divider)">
+          <span style="font-size:11px;color:var(--dim)">Current quarter avg</span>
+          <span style="font-size:14px;font-weight:800;color:var(--blue);font-family:'JetBrains Mono'" id="trend-val">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Pillar Breakdown</div></div>
+      <div class="card-body">
+        <div style="display:flex;justify-content:center;margin-bottom:18px"><svg width="110" height="110" id="pillar-ring" viewBox="0 0 110 110"><circle cx="55" cy="55" r="44" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="12"/><circle id="ring-fill" cx="55" cy="55" r="44" fill="none" stroke="var(--blue)" stroke-width="12" stroke-dasharray="276.5" stroke-dashoffset="276" stroke-linecap="round" transform="rotate(-90 55 55)"/><text id="ring-val" x="55" y="50" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="20" font-weight="800" fill="#f0f2fa">—</text><text x="55" y="67" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="10" fill="#8892b0">WBI Score</text></svg></div>
+        <div class="pillar-group" id="pillar-bars"></div>
+      </div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Department Snapshot</div><button class="tb-btn ghost" style="padding:5px 10px;font-size:11px" onclick="goPage('department')">View All →</button></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Department</th><th>WBI</th><th>Category</th><th>Risk%</th><th>Δ</th></tr></thead><tbody id="dept-snap"></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Category Distribution</div></div>
+      <div class="card-body">
+        <div class="dist-bar" id="dist-bar"></div>
+        <div id="dist-legend" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE: DEPARTMENTS
+══════════════════════════════════ -->
+<div class="page" id="pg-department">
+  <div class="kpi-grid">
+    <div class="kpi blue"><div class="kpi-glow"></div><div class="kpi-lbl">Departments</div><div class="kpi-val" style="color:var(--blue)" id="d-count">—</div><div class="kpi-sub">Tracked this quarter</div></div>
+    <div class="kpi teal"><div class="kpi-glow"></div><div class="kpi-lbl">Best WBI Dept</div><div class="kpi-val" style="color:var(--teal)" id="d-best-val">—</div><div class="kpi-sub" id="d-best-nm">—</div></div>
+    <div class="kpi amber"><div class="kpi-glow"></div><div class="kpi-lbl">Lowest WBI Dept</div><div class="kpi-val" style="color:var(--amber)" id="d-low-val">—</div><div class="kpi-sub" id="d-low-nm">—</div></div>
+    <div class="kpi rose"><div class="kpi-glow"></div><div class="kpi-lbl">Depts At Risk</div><div class="kpi-val" style="color:var(--rose)" id="d-risk">—</div><div class="kpi-sub">Need intervention</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title">Department Wellbeing Index</div></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Department</th><th>Headcount</th><th>WBI</th><th>Physical</th><th>Emotional</th><th>Financial</th><th>Social</th><th>Category</th><th>Attrition%</th></tr></thead><tbody id="dept-table"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE: MANAGERS
+══════════════════════════════════ -->
+<div class="page" id="pg-manager">
+  <div class="kpi-grid">
+    <div class="kpi blue"><div class="kpi-glow"></div><div class="kpi-lbl">Managers</div><div class="kpi-val" style="color:var(--blue)" id="m-count">—</div><div class="kpi-sub">With direct reports</div></div>
+    <div class="kpi teal"><div class="kpi-glow"></div><div class="kpi-lbl">Best Team WBI</div><div class="kpi-val" style="color:var(--teal)" id="m-best">—</div><div class="kpi-sub" id="m-best-nm">—</div></div>
+    <div class="kpi amber"><div class="kpi-glow"></div><div class="kpi-lbl">Flagged Managers</div><div class="kpi-val" style="color:var(--amber)" id="m-flag">—</div><div class="kpi-sub">High team risk</div></div>
+    <div class="kpi rose"><div class="kpi-glow"></div><div class="kpi-lbl">Avg High Risk EEs</div><div class="kpi-val" style="color:var(--rose)" id="m-highrisk">—</div><div class="kpi-sub">Per manager</div></div>
+  </div>
+  <div class="g32">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Manager Scorecards</div></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Manager</th><th>Dept</th><th>Team</th><th>Avg WBI</th><th>Weak Pillar</th><th>High Risk</th><th>Action</th></tr></thead><tbody id="mgr-table"></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Pillar Heatmap</div></div>
+      <div class="card-body" id="mgr-heatmap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE: EMPLOYEE PROFILE
+══════════════════════════════════ -->
+<div class="page" id="pg-employee">
+  <div style="margin-bottom:14px">
+    <label style="font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:7px">Select Employee</label>
+    <select class="f-sel" id="emp-selector" onchange="renderEmployee()" style="max-width:340px;margin-bottom:0"></select>
+  </div>
+  <div class="card mb" id="emp-hero" style="display:none">
+    <div class="card-body">
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div class="av" id="emp-av" style="width:64px;height:64px;border-radius:16px;font-size:22px;flex-shrink:0;background:linear-gradient(135deg,var(--blue),var(--purple))">RS</div>
+        <div style="flex:1;min-width:180px">
+          <div style="font-size:clamp(16px,3vw,22px);font-weight:800;letter-spacing:-.5px;margin-bottom:4px" id="emp-name">—</div>
+          <div style="font-size:12px;color:var(--muted)" id="emp-sub">—</div>
+          <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap" id="emp-tags"></div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px">WBI Score</div>
+          <div style="font-size:clamp(36px,6vw,52px);font-weight:800;letter-spacing:-2px;line-height:1" id="emp-wbi">—</div>
+          <span id="emp-cat">—</span>
+        </div>
+        <svg width="80" height="80" viewBox="0 0 80 80" id="emp-ring-svg">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10"/>
+          <circle id="emp-ring-fill" cx="40" cy="40" r="32" fill="none" stroke="var(--amber)" stroke-width="10" stroke-dasharray="201" stroke-dashoffset="201" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="g2 mb">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Pillar Scores</div></div>
+      <div class="card-body"><div class="pillar-group" id="emp-pillars"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Attrition Risk Prediction</div></div>
+      <div class="card-body" style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="12"/>
+          <circle id="risk-ring" cx="50" cy="50" r="40" fill="none" stroke="var(--rose)" stroke-width="12" stroke-dasharray="251" stroke-dashoffset="251" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+          <text id="risk-pct-txt" x="50" y="46" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="18" font-weight="800" fill="#f5385d">—%</text>
+          <text x="50" y="62" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="9" fill="#8892b0">6-month risk</text>
+        </svg>
+        <div>
+          <div id="risk-chip-big" style="margin-bottom:10px"></div>
+          <div style="font-size:11px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Top signals</div>
+          <div id="risk-signals" style="font-size:11.5px;color:var(--muted);line-height:2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title">Metric Breakdown</div><span class="tag" id="emp-period-tag">Q1 2025</span></div>
+    <div class="card-body" id="emp-metrics"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE: ATTRITION RISK
+══════════════════════════════════ -->
+<div class="page" id="pg-attrition">
+  <div class="alert danger" id="attr-alert">
+    <span class="alert-ico">🚨</span>
+    <p id="attr-alert-txt"><strong>Loading…</strong></p>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi rose"><div class="kpi-glow"></div><div class="kpi-lbl">High Risk</div><div class="kpi-val" style="color:var(--rose)" id="a-high">—</div><div class="kpi-sub">Immediate attention</div></div>
+    <div class="kpi amber"><div class="kpi-glow"></div><div class="kpi-lbl">Medium Risk</div><div class="kpi-val" style="color:var(--amber)" id="a-med">—</div><div class="kpi-sub">Monitor closely</div></div>
+    <div class="kpi teal"><div class="kpi-glow"></div><div class="kpi-lbl">Low Risk</div><div class="kpi-val" style="color:var(--teal)" id="a-low">—</div><div class="kpi-sub">Healthy employees</div></div>
+    <div class="kpi blue"><div class="kpi-glow"></div><div class="kpi-lbl">Model Accuracy</div><div class="kpi-val" style="color:var(--blue)">76.4%</div><div class="kpi-sub">v1.2 validated</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title">Employees Flagged — High Attrition Risk</div><button class="tb-btn ghost" style="padding:5px 10px;font-size:11px" onclick="exportAttrition()">📥 Export CSV</button></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Employee</th><th>Dept</th><th>Manager</th><th>WBI</th><th>Risk%</th><th>Top Signal</th><th>Tenure</th><th>Action</th></tr></thead><tbody id="attr-table"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE: DATA UPLOAD
+══════════════════════════════════ -->
+<div class="page" id="pg-upload">
+  <div class="card mb">
+    <div class="card-body" style="padding:16px 20px">
+      <div class="steps">
+        <div class="step act"><div class="step-c done">✓</div><div class="step-l act">Select Dataset</div></div>
+        <div class="step-line done"></div>
+        <div class="step act"><div class="step-c act">2</div><div class="step-l act">Upload File</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-c pend">3</div><div class="step-l">Validate</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-c pend">4</div><div class="step-l">Trigger Scoring</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="g32">
+    <div>
+      <div class="card mb">
+        <div class="card-head"><div class="card-title">1. Select Dataset</div></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="dataset-picker"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">2. Upload CSV / Excel</div></div>
+        <div class="card-body">
+          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDrag(event,true)" ondragleave="handleDrag(event,false)" ondrop="handleDrop(event)">
+            <input type="file" id="file-input" class="file-input" accept=".csv,.xlsx,.xls" onchange="handleFile(event)">
+            <div class="drop-ico">📁</div>
+            <div class="drop-txt">Drop CSV or Excel here</div>
+            <div class="drop-sub">Or click to browse · Max 50 MB</div>
+          </div>
+          <div id="upload-preview" style="margin-top:12px;display:none"></div>
+          <div style="margin-top:12px;padding:12px 14px;background:var(--card);border-radius:10px;border:1px solid var(--divider)">
+            <div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Required Columns</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px" id="req-cols"></div>
+          </div>
+          <!-- Live CSV edit for employees.csv -->
+          <div style="margin-top:12px" id="csv-editor-wrap">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px">📌 Or directly edit the source CSVs and reload — data auto-updates</div>
+            <button class="tb-btn ghost" style="width:100%;justify-content:center" onclick="document.getElementById('csv-input').click()">📂 Load employees.csv to update data live</button>
+            <input type="file" id="csv-input" class="file-input" accept=".csv" onchange="loadCSVData(event)">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Recent Uploads</div></div>
+      <div id="upload-log">
+        <div class="ulog"><div class="ulog-head"><div class="ulog-dot" style="background:var(--green)"></div><span class="ulog-name">employees.csv</span><span class="rc rc-l" style="margin-left:auto;font-size:9px">Active Source</span></div><div class="ulog-meta">20 employees · 2 tenants · Auto-loaded</div><div class="prog" style="padding-left:15px;margin-top:5px"><div class="prog-fill" style="width:100%;background:var(--green)"></div></div></div>
+        <div class="ulog"><div class="ulog-head"><div class="ulog-dot" style="background:var(--green)"></div><span class="ulog-name">managers.csv</span><span class="rc rc-l" style="margin-left:auto;font-size:9px">Active Source</span></div><div class="ulog-meta">10 managers · 2 tenants · Auto-loaded</div><div class="prog" style="padding-left:15px;margin-top:5px"><div class="prog-fill" style="width:100%;background:var(--green)"></div></div></div>
+        <div class="ulog"><div class="ulog-head"><div class="ulog-dot" style="background:var(--green)"></div><span class="ulog-name">wbi_data.csv</span><span class="rc rc-l" style="margin-left:auto;font-size:9px">Active Source</span></div><div class="ulog-meta">Tenant configuration · Auto-loaded</div><div class="prog" style="padding-left:15px;margin-top:5px"><div class="prog-fill" style="width:100%;background:var(--green)"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE: SETTINGS
+══════════════════════════════════ -->
+<div class="page" id="pg-settings">
+  <div class="ptabs">
+    <div class="ptab active" onclick="switchSettingsTab(this,'st-weights')">Pillar Weights</div>
+    <div class="ptab" onclick="switchSettingsTab(this,'st-scoring')">Scoring Config</div>
+    <div class="ptab" onclick="switchSettingsTab(this,'st-users')">Users &amp; Roles</div>
+  </div>
+  <!-- WEIGHTS TAB -->
+  <div id="st-weights">
+    <div class="g32">
+      <div class="card">
+        <div class="card-head"><div class="card-title">Pillar Weight Configuration</div><span class="tag" style="color:var(--teal);border-color:rgba(15,198,194,.25);background:var(--teal-gl)">System Derived</span></div>
+        <div class="card-body">
+          <div class="alert info mb"><span class="alert-ico">ℹ️</span><p>Weights are <strong>statistically derived</strong> from your org's attrition correlation. Total must equal <strong>100%</strong>.</p></div>
+          <div id="wt-container">
+            <div class="wt-row"><span class="wt-ico">🫁</span><span class="wt-lbl">Physical</span><input type="range" min="5" max="60" value="28" oninput="updateWeight(this)"><span class="wt-pct">28%</span></div>
+            <div class="wt-row"><span class="wt-ico">💙</span><span class="wt-lbl">Emotional</span><input type="range" min="5" max="60" value="25" oninput="updateWeight(this)"><span class="wt-pct">25%</span></div>
+            <div class="wt-row"><span class="wt-ico">💰</span><span class="wt-lbl">Financial</span><input type="range" min="5" max="60" value="30" oninput="updateWeight(this)"><span class="wt-pct">30%</span></div>
+            <div class="wt-row"><span class="wt-ico">🤝</span><span class="wt-lbl">Social</span><input type="range" min="5" max="60" value="17" oninput="updateWeight(this)"><span class="wt-pct">17%</span></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;padding-top:16px;border-top:1px solid var(--divider);flex-wrap:wrap;gap:10px">
+            <div style="font-size:14px;font-weight:700">Total: <span id="wt-total" style="color:var(--green)">100%</span></div>
+            <div style="display:flex;gap:8px">
+              <button class="tb-btn ghost" onclick="resetWeights()">Reset</button>
+              <button class="tb-btn cta" onclick="saveWeights()">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Weight Preview</div></div>
+          <div class="card-body" id="wt-preview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- SCORING TAB -->
+  <div id="st-scoring" style="display:none">
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div class="card-title">Scoring Parameters</div></div>
+        <div class="card-body">
+          <div class="set-row"><div class="set-info"><div class="set-nm">Score Refresh</div><div class="set-desc">How often WBI is recomputed</div></div><select class="set-inp"><option>Quarterly</option><option>Monthly</option></select></div>
+          <div class="set-row"><div class="set-info"><div class="set-nm">Normalization Method</div><div class="set-desc">Method for metric scaling</div></div><select class="set-inp"><option>Percentile</option><option>Z-Score</option></select></div>
+          <div class="set-row"><div class="set-info"><div class="set-nm">High Risk Threshold</div><div class="set-desc">Attrition% to flag HIGH</div></div><input class="set-inp" type="number" value="25" min="10" max="60"></div>
+          <div class="set-row"><div class="set-info"><div class="set-nm">Medium Risk Threshold</div><div class="set-desc">Attrition% to flag MEDIUM</div></div><input class="set-inp" type="number" value="15" min="5" max="40"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">ML Model Info</div></div>
+        <div class="card-body">
+          <div class="set-row"><div class="set-info"><div class="set-nm">Model Version</div></div><span class="tag">v1.2</span></div>
+          <div class="set-row"><div class="set-info"><div class="set-nm">Last Trained</div></div><span style="font-size:12px;color:var(--muted)">Jan 15, 2025</span></div>
+          <div class="set-row"><div class="set-info"><div class="set-nm">Validation Accuracy</div></div><span style="font-size:15px;font-weight:800;color:var(--green)">76.4%</span></div>
+          <div class="set-row"><div class="set-info"><div class="set-nm">Training Samples</div></div><span style="font-size:14px;font-weight:700">12,400</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- USERS & ROLES TAB -->
+  <div id="st-users" style="display:none">
+    <div class="card mb">
+      <div class="card-head">
+        <div class="card-title">Users &amp; Access Control</div>
+        <span class="tag" id="users-plan-badge">Pro · 7/20 seats</span>
+        <button class="tb-btn cta" style="padding:6px 14px;font-size:11px;margin-left:auto" onclick="showInviteModal()">＋ Invite User</button>
+      </div>
+      <div class="alert info" style="margin:0 18px 0;border-radius:0;border-left:none;border-right:none;border-top:none;border-bottom:1px solid var(--divider)">
+        <span class="alert-ico">🔐</span>
+        <p>All users are <strong>scoped to this tenant only</strong>. API tokens, data queries and file uploads are isolated per tenant. No cross-tenant access is possible.</p>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Last Active</th><th>Token Scope</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="users-table"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Role Permissions Matrix -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">Role Permissions Matrix</div></div>
+      <div class="card-body">
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Permission</th><th style="text-align:center">Admin</th><th style="text-align:center">HR Manager</th><th style="text-align:center">Viewer</th></tr></thead>
+            <tbody>
+              <tr><td class="str">View all employees &amp; scores</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+              <tr><td class="str">View attrition risk profiles</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">⛔</td></tr>
+              <tr><td class="str">Upload &amp; ingest data files</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">⛔</td></tr>
+              <tr><td class="str">Edit pillar weights / config</td><td style="text-align:center">✅</td><td style="text-align:center">⛔</td><td style="text-align:center">⛔</td></tr>
+              <tr><td class="str">Manage users &amp; roles</td><td style="text-align:center">✅</td><td style="text-align:center">⛔</td><td style="text-align:center">⛔</td></tr>
+              <tr><td class="str">Generate &amp; revoke API tokens</td><td style="text-align:center">✅</td><td style="text-align:center">⛔</td><td style="text-align:center">⛔</td></tr>
+              <tr><td class="str">Export employee data</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">⛔</td></tr>
+              <tr><td class="str">View aggregated dashboards</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Invite Modal -->
+<div id="invite-modal" style="position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center">
+  <div style="background:#1a2240;border:1px solid var(--divider);border-radius:18px;padding:30px 32px;width:min(440px,92vw);box-shadow:0 40px 80px rgba(0,0,0,.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px">
+      <div style="font-size:17px;font-weight:800">Invite New User</div>
+      <button onclick="closeInviteModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div class="alert info mb"><span class="alert-ico">🔐</span><p>This invite will be <strong>scoped to your tenant only</strong>. The user will not have access to any other organisation.</p></div>
+    <label class="f-lbl">Full Name</label>
+    <input class="f-inp" id="inv-name" placeholder="e.g. Priya Agarwal">
+    <label class="f-lbl">Work Email</label>
+    <input class="f-inp" id="inv-email" placeholder="name@company.com" type="email">
+    <label class="f-lbl">Role</label>
+    <select class="f-sel" id="inv-role">
+      <option value="hr_manager">HR Manager</option>
+      <option value="viewer">Viewer</option>
+      <option value="admin">Admin</option>
+    </select>
+    <button class="btn-primary" onclick="sendInvite()">Send Invite →</button>
+  </div>
+</div>
+
+    </div><!-- /page-wrap -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Data source notice -->
+<div class="data-notice" id="data-notice" style="display:none">
+  <strong>📊 Live CSV Data</strong><br>
+  Data loaded from <strong id="dn-source">employees.csv</strong>.<br>
+  Edit CSV files and reload page, or use Upload page to swap data.
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   EMBEDDED CSV DATA
+   (mirrors the .csv files — edit these OR
+    load updated CSVs via the Upload page)
+════════════════════════════════════════════ */
+const DEFAULT_TENANTS_CSV = `tenant_id,tenant_name,tenant_slug,plan,active_users,max_users
+T1,Acme Corp Ltd,acmecorp,Pro,7,20
+T2,TechNova Pvt Ltd,technova,Enterprise,12,50`;
+
+const DEFAULT_EMPLOYEES_CSV = `emp_id,tenant_id,name,email,department,state,manager_id,grade,doj,gender,wbi_score,physical,emotional,financial,social,attrition_risk_pct,category,period
+EMP001,T1,Rahul Sharma,rahul@acme.com,Engineering,Maharashtra,MGR001,L5,2021-06-15,M,61.4,52.3,67.8,74.2,60.9,32,Stable,Q1-2025
+EMP002,T1,Priya Mehta,priya@acme.com,Engineering,Maharashtra,MGR001,L4,2022-03-01,F,58.2,51.0,63.5,68.1,55.2,38,At Risk,Q1-2025
+EMP003,T1,Arjun Nair,arjun@acme.com,Engineering,Karnataka,MGR001,L4,2020-11-10,M,72.5,70.1,74.8,76.2,68.9,12,Stable,Q1-2025
+EMP004,T1,Sneha Patel,sneha@acme.com,Engineering,Gujarat,MGR002,L6,2019-08-20,F,65.3,60.2,68.7,72.4,61.5,22,Stable,Q1-2025
+EMP005,T1,Karan Singh,karan@acme.com,Sales,Delhi,MGR003,L3,2023-01-15,M,81.2,79.5,83.4,80.1,81.8,5,Thriving,Q1-2025
+EMP006,T1,Ananya Roy,ananya@acme.com,Sales,West Bengal,MGR003,L4,2021-09-01,F,78.4,76.8,80.2,77.5,79.1,8,Thriving,Q1-2025
+EMP007,T1,Vikram Das,vikram@acme.com,HR,Tamil Nadu,MGR004,L5,2018-05-10,M,85.3,84.1,87.2,83.8,86.1,3,Thriving,Q1-2025
+EMP008,T1,Neha Joshi,neha@acme.com,HR,Maharashtra,MGR004,L4,2020-02-14,F,82.7,81.3,84.5,80.2,84.8,4,Thriving,Q1-2025
+EMP009,T1,Rohit Kumar,rohit@acme.com,Operations,Uttar Pradesh,MGR005,L3,2022-07-20,M,55.8,50.4,59.2,61.3,52.5,41,At Risk,Q1-2025
+EMP010,T1,Divya Iyer,divya@acme.com,Operations,Tamil Nadu,MGR005,L4,2021-04-05,F,60.1,56.2,63.4,65.8,55.0,28,Stable,Q1-2025
+EMP011,T2,Amit Verma,amit@technova.com,Engineering,Delhi,MGR006,L5,2020-03-10,M,74.8,72.5,77.2,76.4,73.1,11,Stable,Q1-2025
+EMP012,T2,Pooja Sharma,pooja@technova.com,Engineering,Haryana,MGR006,L4,2021-08-15,F,69.2,66.4,71.8,72.5,65.9,18,Stable,Q1-2025
+EMP013,T2,Ravi Gupta,ravi@technova.com,Product,Maharashtra,MGR007,L6,2019-01-20,M,79.5,78.2,81.4,79.8,78.6,7,Thriving,Q1-2025
+EMP014,T2,Kavya Nair,kavya@technova.com,Product,Kerala,MGR007,L5,2020-11-01,F,76.3,74.8,78.5,77.2,74.7,9,Thriving,Q1-2025
+EMP015,T2,Sanjay Patel,sanjay@technova.com,Finance,Gujarat,MGR008,L4,2022-05-10,M,63.5,61.2,66.8,68.4,57.6,24,Stable,Q1-2025
+EMP016,T2,Meera Singh,meera@technova.com,Finance,Rajasthan,MGR008,L3,2023-02-28,F,57.4,53.8,60.2,63.5,51.9,35,At Risk,Q1-2025
+EMP017,T2,Deepak Raj,deepak@technova.com,Sales,Karnataka,MGR009,L4,2021-06-15,M,82.1,80.6,84.3,82.7,80.8,5,Thriving,Q1-2025
+EMP018,T2,Ishita Das,ishita@technova.com,Sales,West Bengal,MGR009,L3,2022-10-01,F,75.6,73.4,78.2,76.1,74.7,10,Thriving,Q1-2025
+EMP019,T2,Nikhil Jain,nikhil@technova.com,Operations,Rajasthan,MGR010,L3,2023-03-15,M,52.3,48.6,55.1,57.8,47.7,48,At Risk,Q1-2025
+EMP020,T2,Preethi Nair,preethi@technova.com,Operations,Kerala,MGR010,L4,2021-01-10,F,66.8,63.5,70.2,68.9,64.6,20,Stable,Q1-2025`;
+
+const DEFAULT_MANAGERS_CSV = `mgr_id,tenant_id,name,department,team_size,avg_wbi,weakest_pillar,high_risk_count,physical,emotional,financial,social
+MGR001,T1,Ankit Verma,Engineering,3,64.0,Physical,2,57.8,68.7,72.8,61.7
+MGR002,T1,Ritu Kapoor,Engineering,1,65.3,Emotional,1,60.2,68.7,72.4,61.5
+MGR003,T1,Suresh Menon,Sales,2,79.8,None,0,78.2,81.8,78.8,80.5
+MGR004,T1,Priya Agarwal,HR,2,84.0,None,0,82.7,85.9,82.0,85.5
+MGR005,T1,Lalit Pandey,Operations,2,57.9,Physical,2,53.3,61.3,63.6,53.8
+MGR006,T2,Rajan Mehta,Engineering,2,72.0,Emotional,0,69.5,74.5,74.5,69.5
+MGR007,T2,Sunita Rao,Product,2,77.9,None,0,76.5,80.0,78.5,76.7
+MGR008,T2,Ajay Sharma,Finance,2,60.5,Social,1,57.5,63.5,66.0,54.8
+MGR009,T2,Ritika Joshi,Sales,2,78.9,None,0,77.0,81.3,79.4,77.8
+MGR010,T2,Harish Nair,Operations,2,59.6,Physical,1,56.1,62.7,63.4,56.2`;
+
+/* ════════════════════════════════════════
+   CSV PARSER
+════════════════════════════════════════ */
+function parseCSV(text) {
+  const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return [];
+  const headers = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.trim());
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = vals[i] !== undefined ? vals[i] : ''; });
+    return obj;
+  });
+}
+
+/* ════════════════════════════════════════
+   APP STATE
+════════════════════════════════════════ */
+let DB = { tenants: [], employees: [], managers: [], users: {} };
+let STATE = { tenant: 'T1', page: 'company', selectedEmp: null, currentUser: null };
+
+// Per-tenant user roster (simulated)
+const TENANT_USERS = {
+  T1: [
+    {id:'U1',name:'Sneha Agarwal',    email:'sneha.a@acmecorp.com',    role:'admin',      last_active:'10 mins ago',  status:'active'},
+    {id:'U2',name:'Rahul Mehta',      email:'rahul.m@acmecorp.com',    role:'hr_manager', last_active:'2 hrs ago',    status:'active'},
+    {id:'U3',name:'Pooja Sharma',     email:'pooja.s@acmecorp.com',    role:'hr_manager', last_active:'Yesterday',    status:'active'},
+    {id:'U4',name:'Karan Joshi',      email:'karan.j@acmecorp.com',    role:'viewer',     last_active:'3 days ago',   status:'active'},
+    {id:'U5',name:'Divya Singh',      email:'divya.s@acmecorp.com',    role:'viewer',     last_active:'1 week ago',   status:'inactive'},
+    {id:'U6',name:'Manish Kumar',     email:'manish.k@acmecorp.com',   role:'hr_manager', last_active:'—',            status:'pending'},
+    {id:'U7',name:'Nisha Patel',      email:'nisha.p@acmecorp.com',    role:'viewer',     last_active:'—',            status:'pending'},
+  ],
+  T2: [
+    {id:'U1',name:'Arjun Rao',        email:'arjun.r@technova.com',    role:'admin',      last_active:'5 mins ago',   status:'active'},
+    {id:'U2',name:'Kavitha Nair',     email:'kavitha.n@technova.com',  role:'hr_manager', last_active:'1 hr ago',     status:'active'},
+    {id:'U3',name:'Siddharth Das',    email:'siddharth.d@technova.com',role:'hr_manager', last_active:'3 hrs ago',    status:'active'},
+    {id:'U4',name:'Preethi Iyer',     email:'preethi.i@technova.com',  role:'hr_manager', last_active:'Yesterday',    status:'active'},
+    {id:'U5',name:'Rohit Gupta',      email:'rohit.g@technova.com',    role:'viewer',     last_active:'2 days ago',   status:'active'},
+    {id:'U6',name:'Ananya Bose',      email:'ananya.b@technova.com',   role:'viewer',     last_active:'4 days ago',   status:'active'},
+    {id:'U7',name:'Vivek Sharma',     email:'vivek.s@technova.com',    role:'viewer',     last_active:'1 week ago',   status:'inactive'},
+    {id:'U8',name:'Meera Pillai',     email:'meera.p@technova.com',    role:'hr_manager', last_active:'—',            status:'pending'},
+    {id:'U9',name:'Rajesh Nair',      email:'rajesh.n@technova.com',   role:'viewer',     last_active:'—',            status:'pending'},
+    {id:'U10',name:'Sunita Verma',    email:'sunita.v@technova.com',   role:'viewer',     last_active:'—',            status:'pending'},
+    {id:'U11',name:'Deepak Joshi',    email:'deepak.j@technova.com',   role:'viewer',     last_active:'Yesterday',    status:'active'},
+    {id:'U12',name:'Lakshmi Reddy',   email:'lakshmi.r@technova.com',  role:'hr_manager', last_active:'6 hrs ago',    status:'active'},
+  ]
+};
+
+function initDB(empCSV, mgrCSV, tenCSV) {
+  DB.tenants   = parseCSV(tenCSV   || DEFAULT_TENANTS_CSV);
+  DB.employees = parseCSV(empCSV   || DEFAULT_EMPLOYEES_CSV);
+  DB.managers  = parseCSV(mgrCSV   || DEFAULT_MANAGERS_CSV);
+  // Coerce numerics
+  DB.employees.forEach(e => {
+    ['wbi_score','physical','emotional','financial','social','attrition_risk_pct'].forEach(k => { e[k] = parseFloat(e[k]) || 0; });
+  });
+  DB.managers.forEach(m => {
+    ['avg_wbi','team_size','high_risk_count','physical','emotional','financial','social'].forEach(k => { m[k] = parseFloat(m[k]) || 0; });
+  });
+}
+
+/* ════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════ */
+function tenantEmps(tid)  { return DB.employees.filter(e => e.tenant_id === tid); }
+function tenantMgrs(tid)  { return DB.managers.filter(m => m.tenant_id === tid); }
+function avg(arr, key)    { return arr.length ? arr.reduce((s,e) => s + (parseFloat(e[key]) || 0), 0) / arr.length : 0; }
+function fmt(n, d=1)      { return Number(n).toFixed(d); }
+function initials(n)      { return n ? n.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase() : '??'; }
+function catBadge(cat)    { const m = {Thriving:'thriving',Stable:'stable','At Risk':'atrisk',Critical:'critical'}; return `<span class="badge ${m[cat]||'stable'}">${cat||'Stable'}</span>`; }
+function riskChip(pct)    { const p = parseFloat(pct); if(p>=25)return`<span class="rc rc-h">${fmt(p,0)}%</span>`; if(p>=15)return`<span class="rc rc-m">${fmt(p,0)}%</span>`; return`<span class="rc rc-l">${fmt(p,0)}%</span>`; }
+function hmColor(v)       { if(v>=80)return'#22d3a0'; if(v>=70)return'#3d7eff'; if(v>=60)return'#e67e22'; if(v>=50)return'#f5a623'; return'#f5385d'; }
+function pillarColor(v)   { if(v>=80)return'var(--green)'; if(v>=70)return'var(--blue)'; if(v>=60)return'var(--amber)'; return'var(--rose)'; }
+function tenure(doj)      { if(!doj)return'—'; const d=(Date.now()-new Date(doj).getTime())/(1000*60*60*24*365); return fmt(d,1)+' yrs'; }
+function avGrad(i)        { const g=['linear-gradient(135deg,#3d7eff,#a855f7)','linear-gradient(135deg,#0fc6c2,#3d7eff)','linear-gradient(135deg,#f5a623,#f5385d)','linear-gradient(135deg,#22d3a0,#0fc6c2)','linear-gradient(135deg,#a855f7,#f5385d)']; return g[i%g.length]; }
+
+function tenantName(tid)  { const t = DB.tenants.find(x=>x.tenant_id===tid); return t ? t.tenant_name : tid; }
+function mgrName(mid)     { const m = DB.managers.find(x=>x.mgr_id===mid); return m ? m.name : mid; }
+
+/* Ring SVG */
+function ringOffset(val, r=44, max=100) {
+  const circ = 2 * Math.PI * r;
+  return circ - (val / max) * circ;
+}
+
+/* Tenant switching disabled — session is locked to logged-in tenant */
+function renderTenantSwitcher(id) { /* no-op */ }
+function buildTenantSwitcher()    { /* no-op */ }
+
+/* ════════════════════════════════════════
+   PAGE: COMPANY OVERVIEW
+════════════════════════════════════════ */
+function renderCompany() {
+  // Populate isolation banner
+  const tName = tenantName(STATE.tenant);
+  if(el('iso-tenant-name')) el('iso-tenant-name').textContent = tName;
+  if(el('iso-token')) el('iso-token').textContent = `${STATE.tenant}:sess_${Math.random().toString(36).slice(2,8)}`;
+  const emps = tenantEmps(STATE.tenant);
+  if (!emps.length) return;
+
+  const wbiAvg = avg(emps, 'wbi_score');
+  const riskAvg = avg(emps, 'attrition_risk_pct');
+  const highRisk = emps.filter(e => e.attrition_risk_pct >= 25);
+  const atRisk = emps.filter(e => e.category === 'At Risk' || e.category === 'Critical');
+
+  // Alert
+  if (highRisk.length) {
+    document.getElementById('company-alert').style.display = 'flex';
+    document.getElementById('ca-txt').textContent = `${highRisk.length} employee${highRisk.length>1?'s':''} flagged HIGH attrition risk this quarter`;
+  } else {
+    document.getElementById('company-alert').style.display = 'none';
+  }
+
+  // KPI
+  el('c-wbi').textContent = fmt(wbiAvg);
+  el('c-wbi').style.color = pillarColor(wbiAvg);
+  el('c-wbi-tr').textContent = '▲ 3.2 vs Q4 2024';
+  el('c-emp').textContent = emps.length;
+  el('c-emp-sub').textContent = `Active employees`;
+  el('c-risk').textContent = fmt(riskAvg) + '%';
+  el('c-risk-sub').textContent = `Avg attrition risk`;
+  el('c-crit').textContent = atRisk.length;
+  el('c-crit-sub').textContent = `At Risk / Critical employees`;
+  document.getElementById('risk-badge').textContent = highRisk.length;
+
+  // Ring
+  el('ring-val').textContent = fmt(wbiAvg);
+  const off = ringOffset(wbiAvg);
+  el('ring-fill').setAttribute('stroke-dashoffset', off);
+  el('ring-fill').setAttribute('stroke', pillarColor(wbiAvg));
+
+  // Pillar bars
+  const pillars = [
+    {name:'🫁 Physical', key:'physical', col:'var(--teal)'},
+    {name:'💙 Emotional', key:'emotional', col:'var(--blue)'},
+    {name:'💰 Financial', key:'financial', col:'var(--amber)'},
+    {name:'🤝 Social', key:'social', col:'var(--purple)'},
+  ];
+  el('pillar-bars').innerHTML = pillars.map(p => {
+    const v = avg(emps, p.key);
+    return `<div class="pillar-row">
+      <div class="pillar-top"><span class="pillar-nm">${p.name}</span><span class="pillar-sc" style="color:${p.col}">${fmt(v)}</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${v}%;background:${p.col}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Trend chart (simulated history)
+  const base = wbiAvg;
+  const history = [-8,-5,-7,-4,-3,-2,-5,-3,0].map((d,i) => ({q:`Q${(i%4)+1}'${22+Math.floor(i/4)}`, v: Math.max(40, base+d)}));
+  history[history.length-1] = {q:'Q1\'25', v: base, cur: true};
+  el('trend-chart').innerHTML = history.map(h => `
+    <div class="cb">
+      <div class="cb-bar" style="height:${Math.round(h.v * 1.1)}px;background:${h.cur?'var(--blue)':'rgba(61,126,255,.25)'};${h.cur?'box-shadow:0 0 14px rgba(61,126,255,.5)':''}"></div>
+      <span class="cb-lbl" style="${h.cur?'color:var(--blue);font-weight:700':''}">${h.q}</span>
+    </div>`).join('');
+  el('trend-val').textContent = fmt(wbiAvg) + ' / 100';
+
+  // Dept snapshot
+  const depts = groupBy(emps, 'department');
+  const rows = Object.entries(depts).sort((a,b)=>avg(b[1],'wbi_score')-avg(a[1],'wbi_score'));
+  el('dept-snap').innerHTML = rows.map(([dept, empsD]) => {
+    const dWbi = avg(empsD, 'wbi_score');
+    const dRisk = avg(empsD, 'attrition_risk_pct');
+    const cat = wbiToCategory(dWbi);
+    return `<tr><td class="str">${dept}</td>
+      <td class="mono" style="color:${pillarColor(dWbi)}">${fmt(dWbi)}</td>
+      <td>${catBadge(cat)}</td>
+      <td>${riskChip(dRisk)}</td>
+      <td style="color:${dWbi>65?'var(--green)':'var(--rose)'};font-weight:700">${dWbi>65?'▲':'▼'} ${fmt(Math.abs(3.2-(dWbi-65)*0.1))}</td>
+    </tr>`;
+  }).join('');
+
+  // Category distribution
+  const cats = {Thriving:0, Stable:0, 'At Risk':0, Critical:0};
+  emps.forEach(e => { if(cats[e.category]!==undefined) cats[e.category]++; else cats['Stable']++; });
+  const total = emps.length;
+  const cols = {Thriving:'var(--green)',Stable:'var(--blue)','At Risk':'var(--amber)',Critical:'var(--rose)'};
+  el('dist-bar').innerHTML = Object.entries(cats).map(([cat,cnt]) => {
+    const pct = total ? Math.round(cnt/total*100) : 0;
+    return `<div class="dist-seg" style="width:${pct}%;background:${cols[cat]};min-width:${pct>0?'8px':'0'}">${pct>8?pct+'%':''}</div>`;
+  }).join('');
+  el('dist-legend').innerHTML = Object.entries(cats).map(([cat,cnt]) => `
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:9px"><div style="width:8px;height:8px;border-radius:50%;background:${cols[cat]}"></div><span style="font-size:13px;font-weight:600">${cat}</span></div>
+      <span style="font-size:16px;font-weight:800;color:${cols[cat]};font-family:'JetBrains Mono'">${cnt}</span>
+    </div>`).join('');
+}
+
+/* ════════════════════════════════════════
+   PAGE: DEPARTMENTS
+════════════════════════════════════════ */
+function renderDepartments() {
+  const emps = tenantEmps(STATE.tenant);
+  const depts = groupBy(emps, 'department');
+  const deptArr = Object.entries(depts).map(([dept, empsD]) => ({
+    dept,
+    count: empsD.length,
+    wbi: avg(empsD, 'wbi_score'),
+    physical: avg(empsD, 'physical'),
+    emotional: avg(empsD, 'emotional'),
+    financial: avg(empsD, 'financial'),
+    social: avg(empsD, 'social'),
+    risk: avg(empsD, 'attrition_risk_pct'),
+  })).sort((a,b) => b.wbi - a.wbi);
+
+  const best = deptArr[0], worst = deptArr[deptArr.length-1];
+  const atRisk = deptArr.filter(d => d.wbi < 60).length;
+
+  el('d-count').textContent = deptArr.length;
+  el('d-best-val').textContent = fmt(best.wbi);
+  el('d-best-nm').innerHTML = `<span class="trend up">${best.dept}</span>`;
+  el('d-low-val').textContent = fmt(worst.wbi);
+  el('d-low-nm').innerHTML = `<span class="trend dn">${worst.dept}</span>`;
+  el('d-risk').textContent = atRisk;
+
+  el('dept-table').innerHTML = deptArr.map(d => {
+    const cat = wbiToCategory(d.wbi);
+    return `<tr>
+      <td class="str">${d.dept}</td>
+      <td class="mono">${d.count}</td>
+      <td><div class="sb-inline"><span class="mono" style="color:${pillarColor(d.wbi)}">${fmt(d.wbi)}</span><span class="sm"><span class="sm-fill" style="width:${d.wbi}%;background:${pillarColor(d.wbi)}"></span></span></div></td>
+      <td class="mono" style="color:${pillarColor(d.physical)}">${fmt(d.physical)}</td>
+      <td class="mono" style="color:${pillarColor(d.emotional)}">${fmt(d.emotional)}</td>
+      <td class="mono" style="color:${pillarColor(d.financial)}">${fmt(d.financial)}</td>
+      <td class="mono" style="color:${pillarColor(d.social)}">${fmt(d.social)}</td>
+      <td>${catBadge(cat)}</td>
+      <td>${riskChip(d.risk)}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════
+   PAGE: MANAGERS
+════════════════════════════════════════ */
+function renderManagers() {
+  const mgrs = tenantMgrs(STATE.tenant);
+  if (!mgrs.length) { el('mgr-table').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--dim)">No managers found</td></tr>'; return; }
+
+  const best = mgrs.reduce((b,m) => m.avg_wbi > b.avg_wbi ? m : b, mgrs[0]);
+  const flagged = mgrs.filter(m => m.high_risk_count > 0);
+  const avgHighRisk = fmt(mgrs.reduce((s,m)=>s+m.high_risk_count,0)/mgrs.length, 1);
+
+  el('m-count').textContent = mgrs.length;
+  el('m-best').textContent = fmt(best.avg_wbi);
+  el('m-best-nm').innerHTML = `<span class="trend up">${best.name}</span>`;
+  el('m-flag').textContent = flagged.length;
+  el('m-highrisk').textContent = avgHighRisk;
+
+  el('mgr-table').innerHTML = mgrs.map((m,i) => `<tr>
+    <td><div style="display:flex;align-items:center;gap:9px"><div class="av" style="background:${avGrad(i)}">${initials(m.name)}</div><span class="str">${m.name}</span></div></td>
+    <td class="mono">${m.department}</td>
+    <td class="mono">${m.team_size}</td>
+    <td class="mono" style="color:${pillarColor(m.avg_wbi)}">${fmt(m.avg_wbi)}</td>
+    <td><span style="font-size:11px;font-weight:700;color:${m.weakest_pillar==='None'?'var(--green)':'var(--rose)'}">${m.weakest_pillar==='None'?'✓ None':m.weakest_pillar+' ↓'}</span></td>
+    <td class="mono" style="color:${m.high_risk_count>0?'var(--rose)':'var(--green)'};font-weight:800">${m.high_risk_count}</td>
+    <td><button class="tb-btn ghost" style="padding:4px 10px;font-size:10px" onclick="goPage('attrition')">${m.high_risk_count>0?'Book 1:1':'Monitor'}</button></td>
+  </tr>`).join('');
+
+  // Heatmap
+  const pillars = ['physical','emotional','financial','social'];
+  const pillarIcons = ['🫁','💙','💰','🤝'];
+  el('mgr-heatmap').innerHTML = `
+    <div style="display:grid;grid-template-columns:auto repeat(4,1fr);gap:5px;align-items:center;margin-bottom:12px">
+      <div></div>${pillarIcons.map(i=>`<div style="font-size:11px;color:var(--dim);text-align:center;font-weight:700">${i}</div>`).join('')}
+      ${mgrs.map(m=>`
+        <div style="font-size:10px;color:var(--dim);font-weight:600;white-space:nowrap;padding-right:6px">${m.name.split(' ')[0]}</div>
+        ${pillars.map(p=>`<div class="hm" style="background:${hmColor(m[p])}">${fmt(m[p],0)}</div>`).join('')}
+      `).join('')}
+    </div>
+    <div style="display:flex;gap:10px;font-size:9.5px;color:var(--dim);flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:9px;height:9px;border-radius:2px;background:#f5385d"></div>Critical(&lt;50)</div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:9px;height:9px;border-radius:2px;background:#f5a623"></div>At Risk(50-59)</div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:9px;height:9px;border-radius:2px;background:#3d7eff"></div>Stable(60-79)</div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:9px;height:9px;border-radius:2px;background:#22d3a0"></div>Thriving(80+)</div>
+    </div>`;
+}
+
+/* ════════════════════════════════════════
+   PAGE: EMPLOYEE PROFILE
+════════════════════════════════════════ */
+function renderEmployeePage() {
+  const emps = tenantEmps(STATE.tenant);
+  const sel = document.getElementById('emp-selector');
+  sel.innerHTML = emps.map((e,i) => `<option value="${e.emp_id}" ${i===0?'selected':''}>${e.name} — ${e.department}</option>`).join('');
+  renderEmployee();
+}
+
+function renderEmployee() {
+  const empId = document.getElementById('emp-selector').value;
+  const e = DB.employees.find(x => x.emp_id === empId);
+  if (!e) return;
+  STATE.selectedEmp = e;
+  document.getElementById('emp-hero').style.display = 'block';
+
+  el('emp-av').textContent = initials(e.name);
+  el('emp-av').style.background = avGrad(DB.employees.indexOf(e));
+  el('emp-name').textContent = e.name;
+  el('emp-sub').textContent = `${e.department} · ${e.state}`;
+  el('emp-tags').innerHTML = `<span class="tag">${e.emp_id}</span><span class="tag">${e.grade}</span><span class="tag">DOJ: ${e.doj}</span><span class="tag">${e.gender==='M'?'Male':'Female'}</span>`;
+  el('emp-wbi').textContent = fmt(e.wbi_score);
+  el('emp-wbi').style.color = pillarColor(e.wbi_score);
+  el('emp-cat').innerHTML = catBadge(e.category);
+
+  // Ring
+  const off = ringOffset(e.wbi_score, 32, 100);
+  el('emp-ring-fill').setAttribute('stroke-dashoffset', off);
+  el('emp-ring-fill').setAttribute('stroke', pillarColor(e.wbi_score));
+
+  // Pillar bars
+  const pillars = [
+    {name:'🫁 Physical', key:'physical'},
+    {name:'💙 Emotional', key:'emotional'},
+    {name:'💰 Financial', key:'financial'},
+    {name:'🤝 Social', key:'social'},
+  ];
+  el('emp-pillars').innerHTML = pillars.map(p => `<div class="pillar-row">
+    <div class="pillar-top"><span class="pillar-nm">${p.name}</span><span class="pillar-sc" style="color:${pillarColor(e[p.key])}">${fmt(e[p.key])}</span></div>
+    <div class="bar-bg"><div class="bar-fill" style="width:${e[p.key]}%;background:${pillarColor(e[p.key])}"></div></div>
+  </div>`).join('');
+
+  // Risk ring
+  const riskOff = 251 - (e.attrition_risk_pct / 100) * 251;
+  el('risk-ring').setAttribute('stroke-dashoffset', riskOff);
+  const riskCol = e.attrition_risk_pct >= 25 ? 'var(--rose)' : e.attrition_risk_pct >= 15 ? 'var(--amber)' : 'var(--green)';
+  el('risk-ring').setAttribute('stroke', riskCol);
+  el('risk-pct-txt').textContent = fmt(e.attrition_risk_pct, 0) + '%';
+  el('risk-pct-txt').setAttribute('fill', riskCol.replace('var(--rose)','#f5385d').replace('var(--amber)','#f5a623').replace('var(--green)','#22d3a0'));
+  const riskLevel = e.attrition_risk_pct >= 25 ? 'HIGH RISK' : e.attrition_risk_pct >= 15 ? 'MEDIUM RISK' : 'LOW RISK';
+  const riskClass = e.attrition_risk_pct >= 25 ? 'rc-h' : e.attrition_risk_pct >= 15 ? 'rc-m' : 'rc-l';
+  el('risk-chip-big').innerHTML = `<span class="rc ${riskClass}" style="font-size:12px;padding:5px 13px">${riskLevel}</span>`;
+
+  // Signals
+  const signals = [];
+  if (e.physical < 60) signals.push(`🔴 Physical ${fmt(e.physical)} (below threshold)`);
+  if (e.social < 65) signals.push(`🟠 Low social engagement (${fmt(e.social)})`);
+  if (e.emotional < 65) signals.push(`🟠 Emotional score low (${fmt(e.emotional)})`);
+  if (e.financial < 65) signals.push(`🟡 Financial score (${fmt(e.financial)})`);
+  if (!signals.length) signals.push(`✅ No critical signals`);
+  el('risk-signals').innerHTML = signals.join('<br>');
+
+  // Metric Cards (redesigned)
+  const metricDefs = [
+    {ico:'🫁',ico_bg:'rgba(15,198,194,.15)',  label:'Physical Wellbeing',    desc:'Leave, sick days, health indicators', score:e.physical,   max:100, bench:68, col:'var(--teal)'},
+    {ico:'💙',ico_bg:'rgba(61,126,255,.15)',  label:'Emotional Wellbeing',   desc:'Survey scores, manager feedback',     score:e.emotional,  max:100, bench:72, col:'var(--blue)'},
+    {ico:'💰',ico_bg:'rgba(245,166,35,.15)',  label:'Financial Wellbeing',   desc:'Increment, IJP, appraisal outcomes',  score:e.financial,  max:100, bench:75, col:'var(--amber)'},
+    {ico:'🤝',ico_bg:'rgba(168,85,247,.15)',  label:'Social Wellbeing',      desc:'Club participation, collaboration',    score:e.social,     max:100, bench:70, col:'var(--purple)'},
+    {ico:'📊',ico_bg:'rgba(34,211,160,.12)',  label:'Composite WBI Score',   desc:'Weighted average across all pillars', score:e.wbi_score,  max:100, bench:72, col:'var(--green)'},
+    {ico:'⚠️',ico_bg:'rgba(245,56,93,.12)',   label:'Attrition Risk',        desc:'ML-predicted 6-month exit probability',score:e.attrition_risk_pct, max:100, bench:20, col:'var(--rose)', invert:true},
+  ];
+  el('emp-metrics').innerHTML = `<div class="metric-cards">${metricDefs.map(m => {
+    const isRisk = m.invert;
+    const fillW  = isRisk ? m.score : m.score;
+    const scoreCol = isRisk
+      ? (m.score >= 25 ? 'var(--rose)' : m.score >= 15 ? 'var(--amber)' : 'var(--green)')
+      : pillarColor(m.score);
+    const aboveBench = isRisk ? m.score <= m.bench : m.score >= m.bench;
+    const fillCol = isRisk
+      ? (m.score >= 25 ? 'var(--rose)' : m.score >= 15 ? 'var(--amber)' : 'var(--green)')
+      : m.col;
+    return `<div class="metric-card">
+      <div class="metric-card-top">
+        <div class="metric-card-ico" style="background:${m.ico_bg}">${m.ico}</div>
+        <div style="text-align:right">
+          <div class="metric-card-score" style="color:${scoreCol}">${isRisk ? fmt(m.score,0)+'%' : fmt(m.score)}</div>
+          <div style="font-size:9.5px;color:${aboveBench?'var(--green)':'var(--rose)'};font-weight:700;margin-top:2px">${aboveBench?'▲ Above':'▼ Below'} benchmark</div>
+        </div>
+      </div>
+      <div class="metric-card-label">${m.label}</div>
+      <div class="metric-card-desc">${m.desc}</div>
+      <div class="metric-card-bar"><div class="metric-card-fill" style="width:${fillW}%;background:${fillCol}"></div></div>
+      <div class="metric-card-footer">
+        <span class="metric-card-bench">Org avg <span>${isRisk ? m.bench+'%' : m.bench}</span></span>
+        <span style="font-size:9.5px;font-family:'JetBrains Mono';color:var(--dim)">${isRisk ? fmt(m.score,0)+'/100' : fmt(m.score)+'/100'}</span>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+/* ════════════════════════════════════════
+   PAGE: ATTRITION RISK
+════════════════════════════════════════ */
+function renderAttrition() {
+  const emps = tenantEmps(STATE.tenant);
+  const high   = emps.filter(e => e.attrition_risk_pct >= 25);
+  const medium = emps.filter(e => e.attrition_risk_pct >= 15 && e.attrition_risk_pct < 25);
+  const low    = emps.filter(e => e.attrition_risk_pct < 15);
+
+  el('a-high').textContent = high.length;
+  el('a-med').textContent = medium.length;
+  el('a-low').textContent = low.length;
+  document.getElementById('risk-badge').textContent = high.length;
+
+  // Alert
+  const weakestPillar = ['physical','emotional','financial','social'].reduce((w,p) => avg(high,p) < avg(high,w) ? p : w, 'physical');
+  el('attr-alert-txt').innerHTML = `<strong>${high.length} employee${high.length!==1?'s':''} are HIGH attrition risk.</strong> Primary driver: ${weakestPillar.charAt(0).toUpperCase()+weakestPillar.slice(1)} pillar (avg ${fmt(avg(high, weakestPillar))}). Immediate manager check-ins recommended.`;
+
+  if (!high.length) {
+    el('attr-table').innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--green)">✅ No employees at high attrition risk</td></tr>`;
+    return;
+  }
+
+  const sorted = [...high].sort((a,b) => b.attrition_risk_pct - a.attrition_risk_pct);
+  el('attr-table').innerHTML = sorted.map((e,i) => {
+    const weakPillar = ['physical','emotional','financial','social'].reduce((w,p) => e[p] < e[w] ? p : w, 'physical');
+    const mgrNm = mgrName(e.manager_id);
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:9px"><div class="av" style="background:${avGrad(i)}">${initials(e.name)}</div><span class="str" style="cursor:pointer;color:var(--blue)" onclick="viewEmployee('${e.emp_id}')">${e.name}</span></div></td>
+      <td class="mono">${e.department}</td>
+      <td class="mono">${mgrNm}</td>
+      <td class="mono" style="color:${pillarColor(e.wbi_score)}">${fmt(e.wbi_score)}</td>
+      <td>${riskChip(e.attrition_risk_pct)}</td>
+      <td style="font-size:12px;color:var(--muted)">${weakPillar.charAt(0).toUpperCase()+weakPillar.slice(1)} ${fmt(e[weakPillar])}</td>
+      <td class="mono">${tenure(e.doj)}</td>
+      <td><button class="tb-btn ghost" style="padding:4px 9px;font-size:10px" onclick="viewEmployee('${e.emp_id}')">View Profile</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function viewEmployee(empId) {
+  STATE.selectedEmp = DB.employees.find(e => e.emp_id === empId);
+  goPage('employee');
+  setTimeout(() => {
+    const sel = document.getElementById('emp-selector');
+    if (sel) { sel.value = empId; renderEmployee(); }
+  }, 100);
+}
+
+/* ════════════════════════════════════════
+   PAGE: UPLOAD
+════════════════════════════════════════ */
+const DATASETS = [
+  {ico:'🏖',nm:'Leave Data',cols:['emp_id','leave_type','days_taken','leave_date','period_year','period_quarter']},
+  {ico:'📋',nm:'IJP / Transfer',cols:['emp_id','ijp_id','target_dept','status','period']},
+  {ico:'📚',nm:'Learning',cols:['emp_id','course_name','hours','completion_date','period']},
+  {ico:'💰',nm:'Increment',cols:['emp_id','increment_pct','effective_date','period']},
+  {ico:'📊',nm:'Survey',cols:['emp_id','pillar_tag','score','survey_date','period']},
+  {ico:'⭐',nm:'Appraisal',cols:['emp_id','mgr_id','rating','period']},
+];
+let selectedDataset = 0;
+
+function renderUpload() {
+  el('dataset-picker').innerHTML = DATASETS.map((d,i) => `
+    <div onclick="selectDataset(${i})" style="padding:12px;border:${i===selectedDataset?'2px solid var(--blue)':'1px solid var(--divider)'};border-radius:10px;cursor:pointer;background:${i===selectedDataset?'var(--blue-gl)':'var(--card)'};transition:all .15s">
+      <div style="font-size:18px;margin-bottom:4px">${d.ico}</div>
+      <div style="font-size:12px;font-weight:700;color:${i===selectedDataset?'var(--blue)':'var(--text)'}">${d.nm}</div>
+    </div>`).join('');
+  updateReqCols();
+}
+
+function selectDataset(i) { selectedDataset = i; renderUpload(); }
+function updateReqCols() {
+  el('req-cols').innerHTML = DATASETS[selectedDataset].cols.map(c => `<span class="tag" style="font-family:'JetBrains Mono';font-size:10px">${c}</span>`).join('');
+}
+
+/* ════════════════════════════════════════
+   PAGE: SETTINGS
+════════════════════════════════════════ */
+function renderSettings() {
+  updateWeightPreview();
+  // Update users tab with current tenant users
+  renderUsersTab();
+}
+
+function renderUsersTab() {
+  const users = TENANT_USERS[STATE.tenant] || [];
+  const t = DB.tenants.find(x => x.tenant_id === STATE.tenant);
+  const activeCount = users.filter(u => u.status === 'active').length;
+  const maxUsers = t ? t.max_users : 20;
+  const plan = t ? t.plan : 'Pro';
+
+  if (el('users-plan-badge')) {
+    el('users-plan-badge').textContent = `${plan} · ${activeCount}/${maxUsers} seats`;
+  }
+
+  const roleLabel  = {admin:'Admin', hr_manager:'HR Manager', viewer:'Viewer'};
+  const roleClass  = {admin:'role-admin', hr_manager:'role-hr', viewer:'role-viewer'};
+  const roleIcon   = {admin:'👑', hr_manager:'🧑‍💼', viewer:'👁️'};
+  const tokenScope = u => `<span class="tag" style="font-size:10px;font-family:'JetBrains Mono'">${STATE.tenant}:${u.id}</span>`;
+
+  if (!el('users-table')) return;
+  el('users-table').innerHTML = users.map(u => `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:9px">
+        <div class="av" style="background:${avGrad(users.indexOf(u))};width:30px;height:30px;border-radius:8px;font-size:11px">${initials(u.name)}</div>
+        <span class="str">${u.name}</span>
+      </div></td>
+      <td class="mono" style="font-size:11.5px">${u.email}</td>
+      <td><span class="role-badge ${roleClass[u.role]}">${roleIcon[u.role]} ${roleLabel[u.role]}</span></td>
+      <td style="font-size:11.5px;color:var(--dim)">${u.last_active}</td>
+      <td>${tokenScope(u)}</td>
+      <td><span class="status-dot status-${u.status}">${u.status.charAt(0).toUpperCase()+u.status.slice(1)}</span></td>
+      <td><div style="display:flex;gap:5px">
+        ${u.role !== 'admin' ? `<button class="tb-btn ghost" style="padding:3px 9px;font-size:10px" onclick="editUserRole('${u.id}')">Edit</button>` : ''}
+        ${u.status === 'pending' ? `<button class="tb-btn ghost" style="padding:3px 9px;font-size:10px;color:var(--amber)" onclick="resendInvite('${u.email}')">Resend</button>` : ''}
+        ${u.role !== 'admin' ? `<button class="tb-btn ghost" style="padding:3px 9px;font-size:10px;color:var(--rose)" onclick="revokeUser('${u.id}','${u.name}')">Revoke</button>` : ''}
+      </div></td>
+    </tr>`).join('');
+}
+
+function showInviteModal()  { el('invite-modal').classList.add('open'); }
+function closeInviteModal() { el('invite-modal').classList.remove('open'); }
+function sendInvite() {
+  const name  = el('inv-name').value.trim();
+  const email = el('inv-email').value.trim();
+  const role  = el('inv-role').value;
+  if (!name || !email) { alert('Please fill in name and email.'); return; }
+  // Add to in-memory roster
+  const users = TENANT_USERS[STATE.tenant];
+  const newId = 'U' + (users.length + 1);
+  users.push({id:newId, name, email, role, last_active:'—', status:'pending'});
+  closeInviteModal();
+  el('inv-name').value=''; el('inv-email').value='';
+  renderUsersTab();
+  const banner = document.createElement('div');
+  banner.className='alert success';banner.style.marginBottom='14px';
+  banner.innerHTML=`<span class="alert-ico">✅</span><p><strong>Invite sent to ${email}</strong> as ${role.replace('_',' ')}. They will receive a tenant-scoped access link.</p>`;
+  document.getElementById('st-users').prepend(banner);
+  setTimeout(()=>banner.remove(),4000);
+}
+function editUserRole(uid) {
+  const users = TENANT_USERS[STATE.tenant];
+  const u = users.find(x=>x.id===uid); if(!u)return;
+  const roles = ['viewer','hr_manager','admin'];
+  const next = roles[(roles.indexOf(u.role)+1)%roles.length];
+  u.role = next;
+  renderUsersTab();
+}
+function resendInvite(email) { alert(`Invite resent to ${email}`); }
+function revokeUser(uid, name) {
+  if (!confirm(`Revoke access for ${name}? This will invalidate their tenant-scoped API token.`)) return;
+  const users = TENANT_USERS[STATE.tenant];
+  const idx = users.findIndex(x=>x.id===uid);
+  if(idx>-1) users.splice(idx,1);
+  renderUsersTab();
+}
+
+function switchSettingsTab(btn, tabId) {
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  ['st-weights','st-scoring','st-users'].forEach(id => {
+    const e=document.getElementById(id); if(e) e.style.display = id===tabId?'block':'none';
+  });
+  if (tabId === 'st-users') renderUsersTab();
+}
+
+function updateWeightPreview() {
+  const rows = document.querySelectorAll('#wt-container .wt-row');
+  const colors = ['var(--teal)','var(--blue)','var(--amber)','var(--purple)'];
+  const icons = ['🫁','💙','💰','🤝'];
+  let html = '<div class="pillar-group">';
+  rows.forEach((r,i) => {
+    const v = parseInt(r.querySelector('input').value);
+    const lbl = r.querySelector('.wt-lbl').textContent;
+    html += `<div class="pillar-row"><div class="pillar-top"><span class="pillar-nm">${icons[i]} ${lbl}</span><span class="pillar-sc" style="color:${colors[i]}">${v}%</span></div><div class="bar-bg"><div class="bar-fill" style="width:${v/60*100}%;background:${colors[i]}"></div></div></div>`;
+  });
+  html += '</div>';
+  if (el('wt-preview')) el('wt-preview').innerHTML = html;
+}
+
+function updateWeight(inp) {
+  inp.nextElementSibling.textContent = inp.value + '%';
+  const vals = [...document.querySelectorAll('#wt-container input[type=range]')].map(i=>parseInt(i.value));
+  const total = vals.reduce((a,b)=>a+b,0);
+  const tot = el('wt-total');
+  tot.textContent = total + '%';
+  tot.style.color = total===100?'var(--green)':total>100?'var(--rose)':'var(--amber)';
+  updateWeightPreview();
+}
+function resetWeights() {
+  const defaults = [28,25,30,17];
+  document.querySelectorAll('#wt-container input[type=range]').forEach((inp,i) => { inp.value=defaults[i]; inp.nextElementSibling.textContent=defaults[i]+'%'; });
+  el('wt-total').textContent='100%'; el('wt-total').style.color='var(--green)';
+  updateWeightPreview();
+}
+function saveWeights() {
+  const banner = document.createElement('div');
+  banner.className = 'alert success'; banner.style.marginBottom='0';
+  banner.innerHTML = '<span class="alert-ico">✅</span><p><strong>Weights saved successfully.</strong> Scores will be recomputed on next scheduled run.</p>';
+  document.getElementById('st-weights').prepend(banner);
+  setTimeout(()=>banner.remove(),3000);
+}
+function switchSettingsTab(btn, tabId) {
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  ['st-weights','st-scoring','st-users'].forEach(id => { const e=document.getElementById(id); if(e) e.style.display = id===tabId?'block':'none'; });
+  if (tabId === 'st-users') renderUsersTab();
+}
+
+/* ════════════════════════════════════════
+   UTILITIES
+════════════════════════════════════════ */
+function el(id) { return document.getElementById(id); }
+function groupBy(arr, key) { return arr.reduce((g,x) => { (g[x[key]] = g[x[key]] || []).push(x); return g; }, {}); }
+function wbiToCategory(wbi) { if(wbi>=80)return'Thriving'; if(wbi>=60)return'Stable'; if(wbi>=40)return'At Risk'; return'Critical'; }
+
+const METRIC_ROWS = {
+  'metric-row': `display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--divider)`,
+  'metric-ico': `width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0`,
+  'metric-nm': `font-size:12px;font-weight:700;margin-bottom:2px`,
+  'metric-sub': `font-size:10.5px;color:var(--muted)`,
+  'metric-num': `font-size:18px;font-weight:800;font-family:'JetBrains Mono'`,
+};
+
+/* ════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════ */
+const PAGES = ['company','department','manager','employee','attrition','upload','settings'];
+const PAGE_TITLES = {
+  company:    'Company Overview',
+  department: 'Department Analytics',
+  manager:    'Manager Scorecards',
+  employee:   'Employee Profile',
+  attrition:  'Attrition Risk Report',
+  upload:     'Data Upload',
+  settings:   'Platform Settings',
+};
+
+function goPage(page) {
+  STATE.page = page;
+  PAGES.forEach(p => {
+    const pg = el('pg-' + p); if(pg) pg.classList.toggle('show', p===page);
+    const nl = el('nl-' + p); if(nl) nl.classList.toggle('active', p===page);
+  });
+  el('tb-title').innerHTML = `${PAGE_TITLES[page]} <span id="tb-sub">${tenantName(STATE.tenant)}</span>`;
+  renderPage(page);
+  // Close mobile sidebar
+  if (window.innerWidth <= 768) closeMobileNav();
+}
+
+function renderPage(page) {
+  const renderMap = {
+    company: renderCompany, department: renderDepartments, manager: renderManagers,
+    employee: renderEmployeePage, attrition: renderAttrition, upload: renderUpload, settings: renderSettings,
+  };
+  if (renderMap[page]) renderMap[page]();
+}
+
+/* ════════════════════════════════════════
+   SIDEBAR TOGGLE
+════════════════════════════════════════ */
+let sidebarCollapsed = false;
+function toggleSidebar() {
+  if (window.innerWidth <= 768) {
+    const sb = el('sidebar');
+    const mo = el('mob-overlay');
+    if (sb.classList.contains('mobile-open')) {
+      sb.classList.remove('mobile-open');
+      mo.classList.remove('show');
+    } else {
+      sb.classList.add('mobile-open');
+      mo.classList.add('show');
+    }
+  } else {
+    sidebarCollapsed = !sidebarCollapsed;
+    el('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+  }
+}
+function closeMobileNav() {
+  el('sidebar').classList.remove('mobile-open');
+  el('mob-overlay').classList.remove('show');
+}
+
+/* ════════════════════════════════════════
+   USER MENU & LOGOUT
+════════════════════════════════════════ */
+function toggleUserMenu() {
+  const dd = document.getElementById('user-dropdown');
+  const isOpen = dd.classList.toggle('open');
+  document.getElementById('dd-caret').textContent = isOpen ? '▴' : '▾';
+  if (isOpen) {
+    // Close when clicking outside
+    setTimeout(() => document.addEventListener('click', closeOnOutside), 0);
+  }
+}
+function closeUserMenu() {
+  const dd = document.getElementById('user-dropdown');
+  dd.classList.remove('open');
+  const caret = document.getElementById('dd-caret');
+  if (caret) caret.textContent = '▾';
+  document.removeEventListener('click', closeOnOutside);
+}
+function closeOnOutside(e) {
+  const menu = document.querySelector('.user-menu');
+  if (menu && !menu.contains(e.target)) closeUserMenu();
+}
+function doLogout() {
+  closeUserMenu();
+  // Show logout confirmation overlay
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = `
+    <div style="background:#1a2240;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:36px 40px;width:min(380px,90vw);text-align:center;box-shadow:0 40px 80px rgba(0,0,0,.6)">
+      <div style="width:52px;height:52px;border-radius:14px;background:rgba(245,56,93,.12);border:1px solid rgba(245,56,93,.25);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 18px">⏻</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:6px">Sign out?</div>
+      <div style="font-size:13px;color:#8892b0;margin-bottom:24px;line-height:1.6">Your tenant-scoped session for <strong style="color:#f0f2fa" id="logout-tenant-name"></strong> will be terminated and API token invalidated.</div>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button onclick="this.closest('div[style]').remove()" style="padding:10px 22px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#8892b0;font-family:Plus Jakarta Sans;font-size:13px;font-weight:700;cursor:pointer">Cancel</button>
+        <button onclick="confirmLogout()" style="padding:10px 22px;border-radius:10px;border:none;background:linear-gradient(135deg,#f5385d,#c0152e);color:#fff;font-family:Plus Jakarta Sans;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(245,56,93,.4)">Sign out</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const tn = document.getElementById('logout-tenant-name');
+  if (tn) tn.textContent = document.getElementById('dd-uname').textContent.split('·')[0]?.trim() || 'this tenant';
+}
+function confirmLogout() {
+  // Reset state
+  STATE.tenant = null;
+  STATE.currentUser = null;
+  STATE.page = 'company';
+  // Remove isolation note if present
+  document.querySelectorAll('.sb-user ~ div, .sidebar .iso-note').forEach(n => n.remove());
+  // Reset sidebar branding
+  document.getElementById('sb-logo-text').innerHTML = 'WBI<em>Saas</em>';
+  // Hide app, show login
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('sc-login').classList.add('show');
+  // Reset login form
+  document.getElementById('login-email').value = 'admin@acmecorp.com';
+  // Remove confirm overlay
+  document.querySelectorAll('body > div[style*="z-index:300"]').forEach(e => e.remove());
+  // Deactivate all nav
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  // Reset sidebar isolation note for next login
+  const existingNotes = document.querySelectorAll('.sidebar > div:not(.sb-logo):not(.sb-sec):not(.nav-link):not(.sb-user)');
+  existingNotes.forEach(n => n.remove());
+}
+
+/* ════════════════════════════════════════
+   LOGIN
+════════════════════════════════════════ */
+function doLogin() {
+  const tenantId = el('login-tenant').value;
+  STATE.tenant = tenantId;
+  STATE.currentUser = { name: 'Sneha Agarwal', role: 'admin', tenant: tenantId };
+  const t = DB.tenants.find(x => x.tenant_id === tenantId);
+  const tName = t ? t.tenant_name : tenantId;
+
+  // Lock the app to this tenant — no switching possible in session
+  el('sc-login').classList.remove('show');
+  el('app').classList.add('show');
+
+  // Update sidebar branding with tenant name + isolation chip
+  el('sb-logo-text').innerHTML = `<span style="font-size:12px;font-weight:800;letter-spacing:-.3px">${tName}</span>`;
+  el('sb-urole').textContent = 'Admin · Tenant-scoped session';
+  el('sb-uname').textContent = STATE.currentUser.name;
+  el('sb-avatar').textContent = initials(STATE.currentUser.name);
+  // Populate dropdown header
+  if(el('dd-uname')) el('dd-uname').textContent = STATE.currentUser.name;
+  if(el('dd-urole')) el('dd-urole').textContent = 'Admin · ' + tName;
+
+  // Show isolation notice in sidebar bottom
+  const note = document.createElement('div');
+  note.style.cssText = 'padding:8px 12px;margin:0 8px 8px;background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.18);border-radius:8px;font-size:10px;color:var(--dim);line-height:1.5';
+  note.innerHTML = `<span style="color:var(--purple);font-weight:700">🔐 Isolated session</span><br>Data scoped to ${tName} only`;
+  el('sidebar').querySelector('.sb-user').before(note);
+
+  goPage('company');
+}
+
+/* ════════════════════════════════════════
+   FILE HANDLING (live CSV update)
+════════════════════════════════════════ */
+function handleDrag(e, over) { e.preventDefault(); el('drop-zone').classList.toggle('drag-over', over); }
+function handleDrop(e) {
+  e.preventDefault(); el('drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0]; if(file) processUploadFile(file);
+}
+function handleFile(e) { const f = e.target.files[0]; if(f) processUploadFile(f); }
+function processUploadFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const text = ev.target.result;
+    const preview = el('upload-preview');
+    preview.style.display='block';
+    preview.innerHTML = `<div class="alert success" style="margin-bottom:0"><span class="alert-ico">✅</span><p><strong>${file.name}</strong> loaded (${Math.round(file.size/1024)}KB). Showing preview below.</p></div>`;
+    // Show first 5 rows
+    const rows = parseCSV(text).slice(0,5);
+    if (rows.length) {
+      const headers = Object.keys(rows[0]);
+      preview.innerHTML += `<div class="tbl-wrap" style="margin-top:10px"><table class="tbl"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${headers.map(h=>`<td>${r[h]}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    }
+    // Add to upload log
+    const log = el('upload-log');
+    const item = document.createElement('div');
+    item.className = 'ulog';
+    item.innerHTML = `<div class="ulog-head"><div class="ulog-dot" style="background:var(--green)"></div><span class="ulog-name">${file.name}</span><span class="rc rc-l" style="margin-left:auto;font-size:9px">Uploaded</span></div><div class="ulog-meta">${rows.length}+ rows · ${new Date().toLocaleTimeString()}</div><div class="prog" style="padding-left:15px;margin-top:5px"><div class="prog-fill" style="width:100%;background:var(--green)"></div></div>`;
+    log.prepend(item);
+  };
+  reader.readAsText(file);
+}
+
+function loadCSVData(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const csv = ev.target.result;
+    // Detect which CSV by headers
+    const firstLine = csv.split('\n')[0];
+    if (firstLine.includes('emp_id') && firstLine.includes('wbi_score')) {
+      initDB(csv, null, null);
+      showNotice('employees.csv');
+      alert('✅ Employee data updated! All pages now reflect the new CSV data.');
+    } else if (firstLine.includes('mgr_id') && firstLine.includes('avg_wbi')) {
+      initDB(null, csv, null);
+      showNotice('managers.csv');
+      alert('✅ Manager data updated!');
+    } else if (firstLine.includes('tenant_id') && firstLine.includes('tenant_name')) {
+      initDB(null, null, csv);
+      alert('✅ Tenant data updated!');
+    } else {
+      alert('CSV detected but columns not recognized. Please use the standard column format.');
+      return;
+    }
+    renderPage(STATE.page);
+    e.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+function showNotice(src) {
+  const n = el('data-notice'); n.style.display='block';
+  el('dn-source').textContent = src;
+  setTimeout(()=>n.style.display='none', 6000);
+}
+
+function exportData() {
+  const emps = tenantEmps(STATE.tenant);
+  const headers = Object.keys(emps[0]||{});
+  const csv = [headers.join(','), ...emps.map(e=>headers.map(h=>e[h]).join(','))].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`wbi_export_${STATE.tenant}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function exportAttrition() {
+  const high = tenantEmps(STATE.tenant).filter(e=>e.attrition_risk_pct>=25);
+  if(!high.length){alert('No high-risk employees to export.');return;}
+  const headers = ['emp_id','name','department','wbi_score','attrition_risk_pct','physical','emotional','financial','social'];
+  const csv = [headers.join(','), ...high.map(e=>headers.map(h=>e[h]).join(','))].join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`attrition_high_risk_${STATE.tenant}.csv`;a.click();
+}
+
+const metric_row_style = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--divider)';
+const metric_ico_style = 'width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0';
+
+/* Expose metric-row styles inline for emp metrics */
+const mRow = (ico,nm,val,score) => `<div style="${metric_row_style}"><div style="${metric_ico_style}">${ico}</div><div style="flex:1"><div style="font-size:12px;font-weight:700;margin-bottom:2px">${nm}</div><div style="font-size:10.5px;color:var(--muted)">${val}</div></div><div style="font-size:18px;font-weight:800;font-family:'JetBrains Mono';color:${pillarColor(score)}">${fmt(score,0)}</div></div>`;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  const overlay = el('data-overlay');
+  try {
+    el('loader-msg').textContent = 'Loading CSV data sources…';
+    initDB(DEFAULT_EMPLOYEES_CSV, DEFAULT_MANAGERS_CSV, DEFAULT_TENANTS_CSV);
+    el('loader-msg').textContent = 'Ready!';
+  } catch(e) {
+    console.error('Init error:', e);
+    el('loader-msg').textContent = 'Error: ' + e.message;
+  }
+  overlay.classList.add('fade-out');
+  setTimeout(() => { overlay.style.display = 'none'; }, 400);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+emp_id,tenant_id,name,email,department,state,manager_id,grade,doj,gender,wbi_score,physical,emotional,financial,social,attrition_risk_pct,category,period
+EMP001,T1,Rahul Sharma,rahul@acme.com,Engineering,Maharashtra,MGR001,L5,2021-06-15,M,61.4,52.3,67.8,74.2,60.9,32,Stable,Q1-2025
+EMP002,T1,Priya Mehta,priya@acme.com,Engineering,Maharashtra,MGR001,L4,2022-03-01,F,58.2,51.0,63.5,68.1,55.2,38,At Risk,Q1-2025
+EMP003,T1,Arjun Nair,arjun@acme.com,Engineering,Karnataka,MGR001,L4,2020-11-10,M,72.5,70.1,74.8,76.2,68.9,12,Stable,Q1-2025
+EMP004,T1,Sneha Patel,sneha@acme.com,Engineering,Gujarat,MGR002,L6,2019-08-20,F,65.3,60.2,68.7,72.4,61.5,22,Stable,Q1-2025
+EMP005,T1,Karan Singh,karan@acme.com,Sales,Delhi,MGR003,L3,2023-01-15,M,81.2,79.5,83.4,80.1,81.8,5,Thriving,Q1-2025
+EMP006,T1,Ananya Roy,ananya@acme.com,Sales,West Bengal,MGR003,L4,2021-09-01,F,78.4,76.8,80.2,77.5,79.1,8,Thriving,Q1-2025
+EMP007,T1,Vikram Das,vikram@acme.com,HR,Tamil Nadu,MGR004,L5,2018-05-10,M,85.3,84.1,87.2,83.8,86.1,3,Thriving,Q1-2025
+EMP008,T1,Neha Joshi,neha@acme.com,HR,Maharashtra,MGR004,L4,2020-02-14,F,82.7,81.3,84.5,80.2,84.8,4,Thriving,Q1-2025
+EMP009,T1,Rohit Kumar,rohit@acme.com,Operations,Uttar Pradesh,MGR005,L3,2022-07-20,M,55.8,50.4,59.2,61.3,52.5,41,At Risk,Q1-2025
+EMP010,T1,Divya Iyer,divya@acme.com,Operations,Tamil Nadu,MGR005,L4,2021-04-05,F,60.1,56.2,63.4,65.8,55.0,28,Stable,Q1-2025
+EMP011,T2,Amit Verma,amit@technova.com,Engineering,Delhi,MGR006,L5,2020-03-10,M,74.8,72.5,77.2,76.4,73.1,11,Stable,Q1-2025
+EMP012,T2,Pooja Sharma,pooja@technova.com,Engineering,Haryana,MGR006,L4,2021-08-15,F,69.2,66.4,71.8,72.5,65.9,18,Stable,Q1-2025
+EMP013,T2,Ravi Gupta,ravi@technova.com,Product,Maharashtra,MGR007,L6,2019-01-20,M,79.5,78.2,81.4,79.8,78.6,7,Thriving,Q1-2025
+EMP014,T2,Kavya Nair,kavya@technova.com,Product,Kerala,MGR007,L5,2020-11-01,F,76.3,74.8,78.5,77.2,74.7,9,Thriving,Q1-2025
+EMP015,T2,Sanjay Patel,sanjay@technova.com,Finance,Gujarat,MGR008,L4,2022-05-10,M,63.5,61.2,66.8,68.4,57.6,24,Stable,Q1-2025
+EMP016,T2,Meera Singh,meera@technova.com,Finance,Rajasthan,MGR008,L3,2023-02-28,F,57.4,53.8,60.2,63.5,51.9,35,At Risk,Q1-2025
+EMP017,T2,Deepak Raj,deepak@technova.com,Sales,Karnataka,MGR009,L4,2021-06-15,M,82.1,80.6,84.3,82.7,80.8,5,Thriving,Q1-2025
+EMP018,T2,Ishita Das,ishita@technova.com,Sales,West Bengal,MGR009,L3,2022-10-01,F,75.6,73.4,78.2,76.1,74.7,10,Thriving,Q1-2025
+EMP019,T2,Nikhil Jain,nikhil@technova.com,Operations,Rajasthan,MGR010,L3,2023-03-15,M,52.3,48.6,55.1,57.8,47.7,48,At Risk,Q1-2025
+EMP020,T2,Preethi Nair,preethi@technova.com,Operations,Kerala,MGR010,L4,2021-01-10,F,66.8,63.5,70.2,68.9,64.6,20,Stable,Q1-2025

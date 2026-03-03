@@ -1,0 +1,11 @@
+mgr_id,tenant_id,name,department,team_size,avg_wbi,weakest_pillar,high_risk_count,physical,emotional,financial,social
+MGR001,T1,Ankit Verma,Engineering,3,64.0,Physical,2,57.8,68.7,72.8,61.7
+MGR002,T1,Ritu Kapoor,Engineering,1,65.3,Emotional,1,60.2,68.7,72.4,61.5
+MGR003,T1,Suresh Menon,Sales,2,79.8,None,0,78.2,81.8,78.8,80.5
+MGR004,T1,Priya Agarwal,HR,2,84.0,None,0,82.7,85.9,82.0,85.5
+MGR005,T1,Lalit Pandey,Operations,2,57.9,Physical,2,53.3,61.3,63.6,53.8
+MGR006,T2,Rajan Mehta,Engineering,2,72.0,Emotional,0,69.5,74.5,74.5,69.5
+MGR007,T2,Sunita Rao,Product,2,77.9,None,0,76.5,80.0,78.5,76.7
+MGR008,T2,Ajay Sharma,Finance,2,60.5,Social,1,57.5,63.5,66.0,54.8
+MGR009,T2,Ritika Joshi,Sales,2,78.9,None,0,77.0,81.3,79.4,77.8
+MGR010,T2,Harish Nair,Operations,2,59.6,Physical,1,56.1,62.7,63.4,56.2
